@@ -25,7 +25,7 @@ const SectionInfo: React.FC = () => {
         {/* left  */}
         <div className="flex flex-col mb-32 space-y-12 text-center md:w-1/2 md:text-left">
           {/* header */}
-          <h1 className="max-w-md text-4xl md:text-5xl md:leading-tight">
+          <h1 className="max-w-md text-4xl md:text-5xl md:leading-tight mt-6">
             Chat with any PDF document
           </h1>
           <div className="text-3xl font-light text-orange-400">
