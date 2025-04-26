@@ -9,13 +9,19 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Upload } from "lucide-react";
-import { useCallback } from "react";
+import { UploadCloud, X } from "lucide-react";
+import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 
 const UploadPDF: React.FC = () => {
+  const [file, setFile] = useState<File | null>(null);
+  const [url, setUrl] = useState("");
+  const [isBtnEnabled, setIsBtnEnabled] = useState(false);
+  const [open, setOpen] = useState(false);
+
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
+
     if (!file) {
       alert("Please select a file");
       return;
@@ -24,40 +30,83 @@ const UploadPDF: React.FC = () => {
       alert("File size exceeds 10MB");
       return;
     }
+    setFile(file);
+    setIsBtnEnabled(true);
+    setUrl("");
   }, []);
   const { getRootProps, getInputProps } = useDropzone({
     accept: { "application/pdf": [".pdf"] },
     multiple: false,
     onDrop,
   });
+  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUrl(e.target.value);
+    setIsBtnEnabled(true);
+    setFile(null);
+  };
+  const handleFileRemove = () => {
+    setFile(null);
+    setIsBtnEnabled(false);
+  };
+  const resetForm = () => {
+    setFile(null);
+    setUrl("");
+    setIsBtnEnabled(false);
+  };
+  const handleOpenDialog = () => {
+    setOpen(!open);
+    resetForm();
+  };
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (file) {
+      // Handle file upload
+    } else if (url) {
+      // Handle URL upload
+    }
+    handleOpenDialog();
+  };
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={handleOpenDialog}>
       <DialogTrigger asChild>
         <Button variant={"orange"}>
           Upload
-          <Upload className="w-4 h-4 mr-2" style={{ strokeWidth: 3 }} />
+          <UploadCloud className="w-4 h-4 mr-2" style={{ strokeWidth: 3 }} />
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Upload a document</DialogTitle>
         </DialogHeader>
-        <form className="space-y-6">
-          <div
-            {...getRootProps({
-              className:
-                "border-dashed border-2 rounded-md cursor-pointer bg-gray-50 py-8 flex justify-center items-center flex-col",
-            })}
-          >
-            <input {...getInputProps()} />
-            <Upload
-              className="w-10 h-10 text-[#ff612f]"
-              style={{ strokeWidth: 3 }}
-            />
-
-            <p className="mt-2 text-sm text-slate-400">
-              Drag and drop PDF file here or click to upload
-            </p>
+        <form className="space-y-6" onSubmit={handleSubmit}>
+          <div className=" bg-white rounded-xl">
+            <div className="border-dashed border-2 rounded-md cursor-pointer bg-gray-50 h-36 w-full">
+              {file ? (
+                <div className="h-full flex justify-center items-center text-black/70">
+                  <span className="whitespace-nowrap overflow-hidden  text-sm text-ellipsis max-w-[200px]">
+                    {file?.name ?? "No file selected"}
+                  </span>
+                  <Button
+                    variant={"light"}
+                    onClick={handleFileRemove}
+                    className="ml-1 cursor-pointer"
+                  >
+                    <X className="w-4 h-4" style={{ strokeWidth: 3 }} />
+                  </Button>
+                </div>
+              ) : (
+                <div
+                  {...getRootProps()}
+                  className="h-full flex flex-col items-center justify-center cursor-pointer"
+                >
+                  <input {...getInputProps()} name="file" />
+                  <UploadCloud className="w-10 h-10 text-[#ff612f]" />
+                  <p className="mt-2 text-sm text-slate-400">
+                    Drag and drop PDF file here or click to upload
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
           <div className="flex items-center">
             <div className="flex-grow border-t border-gray-200"></div>
@@ -75,14 +124,18 @@ const UploadPDF: React.FC = () => {
               placeholder="https://example.com/doc.pdf"
               className="col-span-3"
               name="url"
+              value={url}
+              onChange={handleUrlChange}
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <Button type="submit" variant={"orange"}>
+            <Button type="submit" variant={"orange"} disabled={!isBtnEnabled}>
               Upload
             </Button>
             <DialogTrigger asChild>
-              <Button variant={"light"}>Cancel</Button>
+              <Button variant={"light"} onClick={resetForm}>
+                Cancel
+              </Button>
             </DialogTrigger>
           </div>
         </form>
