@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BookOpenCheck, Link } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, BookOpenCheck } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
 
 const Navbar: React.FC = () => {
@@ -14,7 +15,8 @@ const Navbar: React.FC = () => {
             <BookOpenCheck className="text-black w-7 h-7 mr-3" />
             <span className="text-lg font-medium text-black">Clarivue</span>
           </div>
-          <Link href={isSignedIn ? "/documents" : "/sign-in"}>
+          {/* <Link href={isSignedIn ? "/documents" : "/sign-in"}> */}
+          <Link href="/documents">
             <Button variant="link">
               Get Started <ArrowRight className=" h-4 w-4" />
             </Button>

@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UploadCloud, X } from "lucide-react";
+import { UploadCloud, X, CheckCircle, XCircle } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 
@@ -18,6 +18,12 @@ const UploadPDF: React.FC = () => {
   const [url, setUrl] = useState("");
   const [isBtnEnabled, setIsBtnEnabled] = useState(false);
   const [open, setOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState<{
+    success: boolean;
+    message: string;
+    fileUrl?: string;
+  } | null>(null);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
@@ -33,45 +39,152 @@ const UploadPDF: React.FC = () => {
     setFile(file);
     setIsBtnEnabled(true);
     setUrl("");
+    setUploadStatus(null);
   }, []);
+
   const { getRootProps, getInputProps } = useDropzone({
     accept: { "application/pdf": [".pdf"] },
     multiple: false,
     onDrop,
   });
+
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUrl(e.target.value);
     setIsBtnEnabled(true);
     setFile(null);
+    setUploadStatus(null);
   };
+
   const handleFileRemove = () => {
     setFile(null);
     setIsBtnEnabled(false);
+    setUploadStatus(null);
   };
+
   const resetForm = () => {
     setFile(null);
     setUrl("");
     setIsBtnEnabled(false);
+    setUploadStatus(null);
   };
+
   const handleOpenDialog = () => {
     setOpen(!open);
-    resetForm();
-  };
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (file) {
-      // Handle file upload
-    } else if (url) {
-      // Handle URL upload
+    if (open) {
+      resetForm();
     }
-    handleOpenDialog();
   };
+
+  const uploadToCloudinary = async (file: File) => {
+    try {
+      setIsUploading(true);
+
+      // Create FormData for the upload
+      const formData = new FormData();
+      formData.append("file", file);
+
+      // Upload to our Next.js API route instead of directly to Cloudinary
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        return {
+          success: true,
+          message: "File uploaded successfully",
+          fileUrl: data.url,
+          publicId: data.public_id,
+        };
+      } else {
+        throw new Error(data.error || "Upload failed");
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : "Upload failed",
+      };
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const uploadUrlToCloudinary = async (urlToUpload: string) => {
+    try {
+      setIsUploading(true);
+
+      const response = await fetch("/api/upload-from-url", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ url: urlToUpload }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        return {
+          success: true,
+          message: "URL uploaded successfully",
+          fileUrl: data.url,
+          publicId: data.public_id,
+        };
+      } else {
+        throw new Error(data.error || "URL upload failed");
+      }
+    } catch (error) {
+      console.error("URL upload error:", error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : "URL upload failed",
+      };
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    let result;
+
+    if (file) {
+      result = await uploadToCloudinary(file);
+    } else if (url) {
+      result = await uploadUrlToCloudinary(url);
+    } else {
+      setUploadStatus({
+        success: false,
+        message: "Please select a file or enter a URL",
+      });
+      return;
+    }
+
+    setUploadStatus({
+      success: result.success,
+      message: result.message,
+      fileUrl: result.fileUrl,
+    });
+
+    if (result.success) {
+      // You can do something with the result.fileUrl here
+      // like saving it to your database or passing it to a parent component
+      setTimeout(() => {
+        handleOpenDialog();
+      }, 2000);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={handleOpenDialog}>
       <DialogTrigger asChild>
         <Button variant={"orange"}>
           Upload
-          <UploadCloud className="w-4 h-4 mr-2" style={{ strokeWidth: 3 }} />
+          <UploadCloud className="w-4 h-4 ml-2" style={{ strokeWidth: 3 }} />
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
@@ -79,17 +192,18 @@ const UploadPDF: React.FC = () => {
           <DialogTitle>Upload a document</DialogTitle>
         </DialogHeader>
         <form className="space-y-6" onSubmit={handleSubmit}>
-          <div className=" bg-white rounded-xl">
+          <div className="bg-white rounded-xl">
             <div className="border-dashed border-2 rounded-md cursor-pointer bg-gray-50 h-36 w-full">
               {file ? (
                 <div className="h-full flex justify-center items-center text-black/70">
-                  <span className="whitespace-nowrap overflow-hidden  text-sm text-ellipsis max-w-[200px]">
+                  <span className="whitespace-nowrap overflow-hidden text-sm text-ellipsis max-w-[200px]">
                     {file?.name ?? "No file selected"}
                   </span>
                   <Button
                     variant={"light"}
                     onClick={handleFileRemove}
                     className="ml-1 cursor-pointer"
+                    type="button"
                   >
                     <X className="w-4 h-4" style={{ strokeWidth: 3 }} />
                   </Button>
@@ -128,12 +242,48 @@ const UploadPDF: React.FC = () => {
               onChange={handleUrlChange}
             />
           </div>
+
+          {uploadStatus && (
+            <div
+              className={`p-3 rounded-md flex items-center ${
+                uploadStatus.success
+                  ? "bg-green-50 text-green-700"
+                  : "bg-red-50 text-red-700"
+              }`}
+            >
+              {uploadStatus.success ? (
+                <CheckCircle className="w-5 h-5 mr-2" />
+              ) : (
+                <XCircle className="w-5 h-5 mr-2" />
+              )}
+              <div>
+                <p className="text-sm font-medium">{uploadStatus.message}</p>
+                {uploadStatus.fileUrl && (
+                  <p className="text-xs truncate mt-1">
+                    <a
+                      href={uploadStatus.fileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline"
+                    >
+                      View uploaded file
+                    </a>
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
           <div className="grid grid-cols-2 gap-4">
-            <Button type="submit" variant={"orange"} disabled={!isBtnEnabled}>
-              Upload
+            <Button
+              type="submit"
+              variant={"orange"}
+              disabled={!isBtnEnabled || isUploading}
+            >
+              {isUploading ? "Uploading..." : "Upload"}
             </Button>
             <DialogTrigger asChild>
-              <Button variant={"light"} onClick={resetForm}>
+              <Button variant={"light"} onClick={resetForm} type="button">
                 Cancel
               </Button>
             </DialogTrigger>
