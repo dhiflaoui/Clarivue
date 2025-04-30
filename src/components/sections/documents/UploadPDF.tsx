@@ -12,8 +12,11 @@ import { Label } from "@/components/ui/label";
 import { UploadCloud, X, CheckCircle, XCircle } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
+import { showToast } from "@/lib/utils";
 
-const UploadPDF: React.FC = () => {
+const UploadPDF: React.FC<{ onUploadSuccess?: () => void }> = ({
+  onUploadSuccess,
+}) => {
   const [file, setFile] = useState<File | null>(null);
   const [url, setUrl] = useState("");
   const [isBtnEnabled, setIsBtnEnabled] = useState(false);
@@ -23,17 +26,18 @@ const UploadPDF: React.FC = () => {
     success: boolean;
     message: string;
     fileUrl?: string;
+    originalName?: string;
   } | null>(null);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
 
     if (!file) {
-      alert("Please select a file");
+      showToast("Please select a PDF file", "error");
       return;
     }
     if (file.size > 1024 * 1024 * 10) {
-      alert("File size exceeds 10MB");
+      showToast("File size exceeds 10MB", "error");
       return;
     }
     setFile(file);
@@ -79,11 +83,9 @@ const UploadPDF: React.FC = () => {
     try {
       setIsUploading(true);
 
-      // Create FormData for the upload
       const formData = new FormData();
       formData.append("file", file);
 
-      // Upload to our Next.js API route instead of directly to Cloudinary
       const response = await fetch("/api/upload", {
         method: "POST",
         body: formData,
@@ -94,12 +96,13 @@ const UploadPDF: React.FC = () => {
       if (response.ok) {
         return {
           success: true,
-          message: "File uploaded successfully",
+          message: `File "${file.name}" uploaded successfully`,
           fileUrl: data.url,
           publicId: data.public_id,
+          originalName: file.name,
         };
       } else {
-        throw new Error(data.error || "Upload failed");
+        throw new Error(data.error ?? "Upload failed");
       }
     } catch (error) {
       console.error("Upload error:", error);
@@ -115,6 +118,8 @@ const UploadPDF: React.FC = () => {
   const uploadUrlToCloudinary = async (urlToUpload: string) => {
     try {
       setIsUploading(true);
+      const urlPath = new URL(urlToUpload).pathname;
+      const filename = urlPath.substring(urlPath.lastIndexOf("/") + 1);
 
       const response = await fetch("/api/upload-from-url", {
         method: "POST",
@@ -132,9 +137,10 @@ const UploadPDF: React.FC = () => {
           message: "URL uploaded successfully",
           fileUrl: data.url,
           publicId: data.public_id,
+          originalName: filename,
         };
       } else {
-        throw new Error(data.error || "URL upload failed");
+        throw new Error(data.error ?? "URL upload failed");
       }
     } catch (error) {
       console.error("URL upload error:", error);
@@ -168,11 +174,13 @@ const UploadPDF: React.FC = () => {
       success: result.success,
       message: result.message,
       fileUrl: result.fileUrl,
+      originalName: result.originalName,
     });
 
     if (result.success) {
-      // You can do something with the result.fileUrl here
-      // like saving it to your database or passing it to a parent component
+      if (onUploadSuccess) {
+        onUploadSuccess();
+      }
       setTimeout(() => {
         handleOpenDialog();
       }, 2000);

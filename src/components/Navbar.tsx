@@ -15,8 +15,8 @@ const Navbar: React.FC = () => {
             <BookOpenCheck className="text-black w-7 h-7 mr-3" />
             <span className="text-lg font-medium text-black">Clarivue</span>
           </div>
-          {/* <Link href={isSignedIn ? "/documents" : "/sign-in"}> */}
-          <Link href="/documents">
+          <Link href={isSignedIn ? "/documents" : "/sign-in"}>
+            {/* <Link href="/documents"> */}
             <Button variant="link">
               Get Started <ArrowRight className=" h-4 w-4" />
             </Button>

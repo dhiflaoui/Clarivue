@@ -24,12 +24,18 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
+    const urlPath = new URL(url).pathname;
+    const filename = urlPath.substring(urlPath.lastIndexOf("/") + 1);
+    const filenameWithoutExt = filename.replace(/\.[^/.]+$/, "");
+    const timestamp = new Date().getTime();
     // Upload from URL to Cloudinary
     const result = await cloudinary.uploader.upload(url, {
       resource_type: "raw",
       folder: "pdfs",
       format: "pdf",
+      public_id: `${filenameWithoutExt}_${timestamp}`,
+      use_filename: true,
+      unique_filename: false,
     });
 
     return NextResponse.json({

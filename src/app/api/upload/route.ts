@@ -1,4 +1,3 @@
-// src/app/api/upload/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import cloudinary from "@/lib/cloudinary";
 
@@ -21,12 +20,18 @@ export async function POST(request: NextRequest) {
     const buffer = await file.arrayBuffer();
     const bytes = new Uint8Array(buffer);
 
+    const originalFilename = file.name;
+    const filenameWithoutExt = originalFilename.replace(/\.[^/.]+$/, "");
+
     const uploadPromise = new Promise<any>((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
           resource_type: "raw",
           folder: "pdfs",
           format: "pdf",
+          public_id: filenameWithoutExt,
+          use_filename: true,
+          unique_filename: false,
         },
         (error, result) => {
           if (error || !result) {
