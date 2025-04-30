@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UploadCloud, X, CheckCircle, XCircle } from "lucide-react";
+import { UploadCloud, X, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { showToast } from "@/lib/utils";
@@ -33,7 +33,7 @@ const UploadPDF: React.FC<{ onUploadSuccess?: () => void }> = ({
     const file = acceptedFiles[0];
 
     if (!file) {
-      showToast("Please select a PDF file", "error");
+      showToast("Please upload only PDF files", "error");
       return;
     }
     if (file.size > 1024 * 1024 * 10) {
@@ -288,7 +288,14 @@ const UploadPDF: React.FC<{ onUploadSuccess?: () => void }> = ({
               variant={"orange"}
               disabled={!isBtnEnabled || isUploading}
             >
-              {isUploading ? "Uploading..." : "Upload"}
+              {isUploading ? (
+                <Loader2
+                  className="w-5 h-5 text-white/80 animate-spin"
+                  style={{ strokeWidth: 3 }}
+                />
+              ) : (
+                "Upload"
+              )}
             </Button>
             <DialogTrigger asChild>
               <Button variant={"light"} onClick={resetForm} type="button">
