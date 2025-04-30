@@ -8,11 +8,27 @@ export interface Document {
   fileSize: string;
   createdAt: string;
 }
-type DeleteResult = {
+
+export interface DeleteResult {
   success: boolean;
   message?: string;
-  details?: any;
-};
+  details?: Record<string, unknown>;
+}
+
+interface CloudinaryResource {
+  asset_id: string;
+  public_id: string;
+  bytes: number;
+  secure_url: string;
+  created_at: string;
+}
+
+interface CloudinaryError {
+  message?: string;
+  http_code?: number;
+  error?: unknown;
+}
+
 export async function getAllDocuments(): Promise<Document[]> {
   try {
     const result = await cloudinary.api.resources({
@@ -25,33 +41,12 @@ export async function getAllDocuments(): Promise<Document[]> {
     if (!result?.resources) {
       return [];
     }
-    return result.resources.map((resource: any) => {
+
+    return result.resources.map((resource: CloudinaryResource) => {
       const public_id = resource.public_id.split("/").pop() ?? "";
 
-      const fileSizeKB = Math.round(resource.bytes / 1024);
-      const fileSize =
-        fileSizeKB > 1024
-          ? `${(fileSizeKB / 1024).toFixed(1)} MB`
-          : `${fileSizeKB} KB`;
-
-      const createdDate = new Date(resource.created_at);
-      const now = new Date();
-      const diffDays = Math.floor(
-        (now.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24)
-      );
-
-      let createdAt = "";
-      if (diffDays === 0) {
-        createdAt = "today";
-      } else if (diffDays === 1) {
-        createdAt = "yesterday";
-      } else if (diffDays < 7) {
-        createdAt = `${diffDays} days ago`;
-      } else if (diffDays < 30) {
-        createdAt = `${Math.floor(diffDays / 7)} weeks ago`;
-      } else {
-        createdAt = createdDate.toLocaleDateString();
-      }
+      const fileSize = formatFileSize(resource.bytes);
+      const createdAt = formatCreatedDate(new Date(resource.created_at));
 
       return {
         id: resource.asset_id,
@@ -62,7 +57,7 @@ export async function getAllDocuments(): Promise<Document[]> {
         createdAt,
       };
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error fetching documents:", error);
     return [];
   }
@@ -72,22 +67,11 @@ export async function deleteDocument(public_id: string): Promise<DeleteResult> {
   try {
     console.log("deleteDocument called with:", public_id);
 
-    // Test if the public_id exists before trying to delete it
-    // TODO :for testing delete After done
-    try {
-      const resourceCheck = await cloudinary.api.resource(public_id, {
-        resource_type: "raw",
-      });
-      console.log("Resource exists:", resourceCheck.public_id);
-    } catch (checkError: any) {
-      console.error("Resource check failed:", checkError);
-      if (checkError.error?.http_code === 404) {
-        return {
-          success: false,
-          message: "Document not found in Cloudinary",
-          details: checkError.error,
-        };
-      }
+    if (!(await resourceExists(public_id))) {
+      return {
+        success: false,
+        message: "Document not found in Cloudinary",
+      };
     }
 
     const result = await cloudinary.uploader.destroy(public_id, {
@@ -103,23 +87,67 @@ export async function deleteDocument(public_id: string): Promise<DeleteResult> {
       return {
         success: false,
         message: "Cloudinary returned non-OK result",
-        details: result,
+        details: result as Record<string, unknown>,
       };
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error in deleteDocument:", error);
-    const errorDetails = {
-      message: error.message ?? "Unknown error",
-      http_code: error.http_code,
-      error_info: error.error,
+
+    const typedError = error as CloudinaryError;
+    const errorDetails: Record<string, unknown> = {
+      message: typedError.message ?? "Unknown error",
+      http_code: typedError.http_code,
+      error_info: typedError.error,
     };
 
     console.error("Cloudinary error details:", errorDetails);
 
     return {
       success: false,
-      message: error.message ?? "Failed to delete document",
+      message: typedError.message ?? "Failed to delete document",
       details: errorDetails,
     };
+  }
+}
+
+function formatFileSize(bytes: number): string {
+  const fileSizeKB = Math.round(bytes / 1024);
+
+  return fileSizeKB > 1024
+    ? `${(fileSizeKB / 1024).toFixed(1)} MB`
+    : `${fileSizeKB} KB`;
+}
+
+function formatCreatedDate(createdDate: Date): string {
+  const now = new Date();
+  const diffDays = Math.floor(
+    (now.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24)
+  );
+
+  if (diffDays === 0) return "today";
+  if (diffDays === 1) return "yesterday";
+  if (diffDays < 7) return `${diffDays} days ago`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+
+  return createdDate.toLocaleDateString();
+}
+
+async function resourceExists(public_id: string): Promise<boolean> {
+  try {
+    await cloudinary.api.resource(public_id, {
+      resource_type: "raw",
+    });
+    return true;
+  } catch (error) {
+    const typedError = error as CloudinaryError;
+    if (
+      typedError.error &&
+      typeof typedError.error === "object" &&
+      "http_code" in typedError.error &&
+      typedError.error.http_code === 404
+    ) {
+      return false;
+    }
+    throw error;
   }
 }

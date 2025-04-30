@@ -22,9 +22,7 @@ const SectionInfo: React.FC = () => {
   return (
     <section className="bg-[#062427]">
       <div className="section-container flex flex-col text-white md:flex-row items-center">
-        {/* left  */}
         <div className="flex flex-col mb-32 space-y-12 text-center md:w-1/2 md:text-left">
-          {/* header */}
           <h1 className="max-w-md text-4xl md:text-5xl md:leading-tight mt-6">
             Chat with any PDF document
           </h1>
@@ -37,14 +35,14 @@ const SectionInfo: React.FC = () => {
               }}
             />
           </div>
-          {/* description */}
+
           <p className="max-w-md  md:max-w-sm text-white/80 font-light leading-7 ">
-            Whether it's legal arguments or financial reports, Clarivue
+            Whether it&apos;s legal arguments or financial reports, Clarivue
             transforms your documents into actionable insights. Ask questions,
             get instant summaries, extract key information, and find what you
             need faster and smarter
           </p>
-          {/* CTA */}
+
           <div>
             <div className="flex justify-center md:justify-start">
               <Button variant={"orange"}>Get Started for free</Button>
@@ -52,7 +50,7 @@ const SectionInfo: React.FC = () => {
             <UserAvatars USERS={USERS} />
           </div>
         </div>
-        {/* right */}
+
         <div className="md:w-1/2">
           <Image src="/images/hero.svg" alt="Hero" width={1000} height={1000} />
         </div>
