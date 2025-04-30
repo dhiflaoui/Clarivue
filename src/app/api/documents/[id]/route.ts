@@ -1,11 +1,6 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { deleteDocument, DeleteResult } from "@/lib/document-service";
 
-interface DocumentParams {
-  params: {
-    id: string;
-  };
-}
 interface SuccessResponse {
   success: true;
 }
@@ -13,11 +8,13 @@ interface ErrorResponse {
   error: string;
 }
 
-export async function DELETE({
-  params,
-}: DocumentParams): Promise<NextResponse<SuccessResponse | ErrorResponse>> {
+export async function DELETE(
+  request: NextRequest
+): Promise<NextResponse<SuccessResponse | ErrorResponse>> {
   try {
-    const public_id = decodeURIComponent(params.id);
+    const url = new URL(request.url);
+    const public_id = decodeURIComponent(url.pathname.split("/").pop() || "");
+
     const fullPublicId = `pdfs/${public_id}`;
 
     console.log("public_id in api routes", public_id);
