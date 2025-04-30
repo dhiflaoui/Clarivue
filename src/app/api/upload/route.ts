@@ -1,7 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import cloudinary from "@/lib/cloudinary";
 
-export async function POST(request: NextRequest) {
+interface UploadResponse {
+  url: string;
+  public_id: string;
+}
+
+interface ErrorResponse {
+  error: string;
+}
+
+interface CloudinaryUploadResult {
+  secure_url: string;
+  public_id: string;
+  [key: string]: unknown;
+}
+
+export async function POST(
+  request: NextRequest
+): Promise<NextResponse<UploadResponse | ErrorResponse>> {
   try {
     const formData = await request.formData();
     const file = formData.get("file") as File;
@@ -23,29 +40,7 @@ export async function POST(request: NextRequest) {
     const originalFilename = file.name;
     const filenameWithoutExt = originalFilename.replace(/\.[^/.]+$/, "");
 
-    const uploadPromise = new Promise<any>((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
-        {
-          resource_type: "raw",
-          folder: "pdfs",
-          format: "pdf",
-          public_id: filenameWithoutExt,
-          use_filename: true,
-          unique_filename: false,
-        },
-        (error, result) => {
-          if (error || !result) {
-            reject(error || new Error("Upload failed"));
-            return;
-          }
-          resolve(result);
-        }
-      );
-
-      uploadStream.end(bytes);
-    });
-
-    const result = await uploadPromise;
+    const result = await uploadToCloudinary(bytes, filenameWithoutExt);
 
     return NextResponse.json({
       url: result.secure_url,
@@ -58,6 +53,33 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+function uploadToCloudinary(
+  fileBytes: Uint8Array,
+  filename: string
+): Promise<CloudinaryUploadResult> {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        resource_type: "raw",
+        folder: "pdfs",
+        format: "pdf",
+        public_id: filename,
+        use_filename: true,
+        unique_filename: false,
+      },
+      (error, result) => {
+        if (error || !result) {
+          reject(error ?? new Error("Upload failed"));
+          return;
+        }
+        resolve(result as CloudinaryUploadResult);
+      }
+    );
+
+    uploadStream.end(fileBytes);
+  });
 }
 
 export const config = {
