@@ -13,6 +13,7 @@ import { UploadCloud, X, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { showToast } from "@/lib/utils";
+import { embedPDFToPinecone } from "@/actions/pinecone";
 
 const UploadPDF: React.FC<{ onUploadSuccess?: () => void }> = ({
   onUploadSuccess,
@@ -155,38 +156,78 @@ const UploadPDF: React.FC<{ onUploadSuccess?: () => void }> = ({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    try {
+      let result;
 
-    let result;
+      if (file) {
+        result = await uploadToCloudinary(file);
+      } else if (url) {
+        result = await uploadUrlToCloudinary(url);
+      } else {
+        setUploadStatus({
+          success: false,
+          message: "Please select a file or enter a URL",
+        });
+        return;
+      }
 
-    if (file) {
-      result = await uploadToCloudinary(file);
-    } else if (url) {
-      result = await uploadUrlToCloudinary(url);
-    } else {
+      setUploadStatus({
+        success: result.success,
+        message: result.message,
+        fileUrl: result.fileUrl,
+        originalName: result.originalName,
+      });
+
+      if (result.success && result.publicId) {
+        console.log("*********Upload Result*************:", result);
+
+        // Add a small delay to ensure the file is available in Cloudinary
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+
+        try {
+          const docs = await embedPDFToPinecone(result.publicId);
+          console.log("*********Embedding Result*************:", docs);
+
+          if (onUploadSuccess) {
+            onUploadSuccess();
+          }
+
+          setTimeout(() => {
+            handleOpenDialog();
+          }, 2000);
+        } catch (embedError) {
+          console.error("Error embedding PDF:", embedError);
+          setUploadStatus({
+            success: false,
+            message: `Upload successful but embedding failed: ${
+              embedError instanceof Error ? embedError.message : "Unknown error"
+            }`,
+          });
+        }
+      }
+      //TODO: extract PDF content from file and save it to Pinecone vector database
+      // i have a file url how to get data from it Cloudinary
+      // result.image_metadata
+      // https://cloudinary.com/documentation/image_upload_api_reference#upload_examples
+      // result
+      // fileUrl: "https://res.cloudinary.com/dft2x51oh/raw/upload/v1750820706/pdfs/Fatma-Tawfeek-Frontend-Developer-Vue.pdf"
+      // message :"File \"Fatma-Tawfeek-Frontend-Developer-Vue.pdf\" uploaded successfully"
+      // originalName: "Fatma-Tawfeek-Frontend-Developer-Vue.pdf"
+      // publicId: "pdfs/Fatma-Tawfeek-Frontend-Developer-Vue.pdf"
+      // success: true
+      // console.log("*********Result*************:", result);
+      // const docs = await embedPDFToPinecone(result.publicId);
+      // console.log(docs);
+    } catch (error) {
+      console.error("Error in handleSubmit:", error);
       setUploadStatus({
         success: false,
-        message: "Please select a file or enter a URL",
+        message: `Upload failed: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`,
       });
-      return;
-    }
-
-    setUploadStatus({
-      success: result.success,
-      message: result.message,
-      fileUrl: result.fileUrl,
-      originalName: result.originalName,
-    });
-
-    if (result.success) {
-      if (onUploadSuccess) {
-        onUploadSuccess();
-      }
-      setTimeout(() => {
-        handleOpenDialog();
-      }, 2000);
     }
   };
-
   return (
     <Dialog open={open} onOpenChange={handleOpenDialog}>
       <DialogTrigger asChild>

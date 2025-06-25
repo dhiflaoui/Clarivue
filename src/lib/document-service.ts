@@ -23,10 +23,17 @@ interface CloudinaryResource {
   created_at: string;
 }
 
-interface CloudinaryError {
-  message?: string;
+export interface CloudinaryError extends Error {
   http_code?: number;
-  error?: unknown;
+  error?: {
+    message: string;
+    http_code?: number;
+  };
+}
+
+// Type guard to check if error is a CloudinaryError
+function isCloudinaryError(error: unknown): error is CloudinaryError {
+  return error instanceof Error && "http_code" in error;
 }
 
 export async function getAllDocuments(): Promise<Document[]> {
@@ -47,7 +54,6 @@ export async function getAllDocuments(): Promise<Document[]> {
 
       const fileSize = formatFileSize(resource.bytes);
       const createdAt = formatCreatedDate(new Date(resource.created_at));
-
       return {
         id: resource.asset_id,
         public_id: resource.public_id,
@@ -62,7 +68,177 @@ export async function getAllDocuments(): Promise<Document[]> {
     return [];
   }
 }
+interface CloudinaryResource {
+  public_id: string;
+  format: string;
+  version: number;
+  resource_type: string;
+  type: string;
+  created_at: string;
+  bytes: number;
+  width: number;
+  height: number;
+  url: string;
+  secure_url: string;
+  tags: string[];
+  context?: Record<string, any>;
+  metadata?: Record<string, any>;
+}
+export async function fetchFileByPublicId(
+  publicId: string
+): Promise<CloudinaryResource> {
+  try {
+    // Validate input
+    console.log("Fetching file with public ID:", publicId);
+    if (!publicId || typeof publicId !== "string" || publicId.trim() === "") {
+      throw new Error("Public ID must be a non-empty string");
+    }
+    const result = await cloudinary.search
+      .expression(`public_id:${publicId}`)
+      .max_results(1)
+      .execute();
 
+    if (result.resources.length === 0) {
+      throw new Error(`File with public ID "${publicId}" not found`);
+    }
+    console.log("*********File Data after fetching *************:", result.resources[0]);
+    return result.resources[0] as CloudinaryResource;
+    // const result = await cloudinary.api.resource(publicId, {
+    //   resource_type: "auto",
+    // });
+    // console.log("*********File Data after fetching *************:", result);
+    // return result as CloudinaryResource;
+  } catch (error: unknown) {
+    if (isCloudinaryError(error)) {
+      const httpCode = error.http_code || error.error?.http_code;
+
+      if (httpCode === 404) {
+        throw new Error(
+          `File with public ID "${publicId}" not found in Cloudinary`
+        );
+      } else if (httpCode === 401) {
+        throw new Error("Unauthorized: Check your Cloudinary API credentials");
+      } else if (httpCode === 403) {
+        throw new Error(
+          "Forbidden: Insufficient permissions to access this resource"
+        );
+      } else if (httpCode === 429) {
+        throw new Error(
+          "Rate limit exceeded: Too many requests to Cloudinary API"
+        );
+      }
+
+      console.error("Error fetching resource from Cloudinary:", {
+        publicId,
+        error: error.message,
+        httpCode,
+        stack: error.stack,
+      });
+      throw new Error(`Failed to fetch file: ${error.message}`);
+    } else if (error instanceof Error) {
+      console.error("Unexpected error:", error.message);
+      throw new Error(`Failed to fetch file: ${error.message}`);
+    } else {
+      console.error("Unknown error type:", error);
+      throw new Error("Failed to fetch file: Unknown error occurred");
+    }
+  }
+}
+
+// export async function fetchFileByUrl(fileUrl: string): Promise<{
+//   data: ArrayBuffer | string;
+//   contentType: string;
+//   fileName: string;
+// } | null> {
+// https://res.cloudinary.com/dft2x51oh/raw/upload/v1746032401/pdfs/Fatma-Tawfeek-Frontend-Developer-Vue.pdf
+// try {
+//   if (!fileUrl.includes("cloudinary.com")) {
+//     throw new Error(
+//       "The provided URL does not appear to be a Cloudinary URL"
+//     );
+//   }
+
+//   // Extract the file name from the URL
+//   const urlParts = fileUrl.split("/");
+//   const fileName = urlParts[urlParts.length - 1];
+
+//   // Fetch the file
+//   const response = await fetch(fileUrl);
+//   console.log(
+//     "*********File Response in doc service*************:",
+//     response
+//   );
+
+//   if (!response.ok) {
+//     throw new Error(
+//       `Failed to fetch file: ${response.status} ${response.statusText}`
+//     );
+//   }
+
+//   // Get content type
+//   const contentType =
+//     response.headers.get("content-type") ?? "application/octet-stream";
+
+//   // Determine how to handle the response based on content type
+//   let data: ArrayBuffer | string;
+
+//   if (
+//     contentType.includes("text") ||
+//     contentType.includes("application/json")
+//   ) {
+//     // For text-based files, return as text
+//     data = await response.text();
+//   } else {
+//     // For binary files, return as ArrayBuffer
+//     data = await response.arrayBuffer();
+//   }
+//   console.log("*********File Data in doc service*************:", data);
+//   console.log(
+//     "*********File Content Type in doc service*************:",
+//     contentType
+//   );
+//   console.log("*********File Name in doc service*************:", fileName);
+//   return {
+//     data,
+//     contentType,
+//     fileName,
+//   };
+// } catch (error) {
+//   console.error("Error fetching file from Cloudinary:", error);
+//   return null;
+// }
+// }
+// export async function getSingleDocument(
+//   publicId: string
+// ): Promise<Document | null> {
+//   try {
+//     const fullPublicId = publicId.includes("/") ? publicId : `pdfs/${publicId}`;
+
+//     const result = await cloudinary.api.resource(fullPublicId, {
+//       resource_type: "raw",
+//     });
+
+//     if (!result) {
+//       return null;
+//     }
+
+//     const public_id = result.public_id.split("/").pop() ?? "";
+//     const fileSize = formatFileSize(result.bytes);
+//     const createdAt = formatCreatedDate(new Date(result.created_at));
+
+//     return {
+//       id: result.asset_id,
+//       public_id: result.public_id,
+//       fileName: public_id,
+//       fileUrl: result.secure_url,
+//       fileSize,
+//       createdAt,
+//     };
+//   } catch (error) {
+//     console.error(`Error fetching document with public_id ${publicId}:`, error);
+//     return null;
+//   }
+// }
 export async function deleteDocument(public_id: string): Promise<DeleteResult> {
   try {
     console.log("deleteDocument called with:", public_id);
