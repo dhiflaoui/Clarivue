@@ -84,6 +84,7 @@ interface CloudinaryResource {
   context?: Record<string, any>;
   metadata?: Record<string, any>;
 }
+//TODO:delete this after success getting file with url
 export async function fetchFileByPublicId(
   publicId: string
 ): Promise<CloudinaryResource> {
@@ -93,6 +94,14 @@ export async function fetchFileByPublicId(
     if (!publicId || typeof publicId !== "string" || publicId.trim() === "") {
       throw new Error("Public ID must be a non-empty string");
     }
+    // const pdfUrl = cloudinary.url(publicId, {
+    //   resource_type: "raw", // or 'auto'
+    //   format: "pdf",
+    // });
+
+    // Fetch the PDF file
+    // const response = await fetch(pdfUrl);
+
     const result = await cloudinary.search
       .expression(`public_id:${publicId}`)
       .max_results(1)
@@ -101,10 +110,18 @@ export async function fetchFileByPublicId(
     if (result.resources.length === 0) {
       throw new Error(`File with public ID "${publicId}" not found`);
     }
-    console.log("*********File Data after fetching *************:", result.resources[0]);
+    console.log(
+      "*********File Data after fetching *************:",
+      result.resources[0]
+    );
     return result.resources[0] as CloudinaryResource;
     // const result = await cloudinary.api.resource(publicId, {
     //   resource_type: "auto",
+    // });
+    // console.log("*********File Data after fetching *************:", result);
+    // return result as CloudinaryResource;
+    // const result = await cloudinary.api.resource(publicId, {
+    //   resource_type: "raw",
     // });
     // console.log("*********File Data after fetching *************:", result);
     // return result as CloudinaryResource;

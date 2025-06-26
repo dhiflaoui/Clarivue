@@ -68,6 +68,7 @@ function uploadToCloudinary(
         public_id: filename,
         use_filename: true,
         unique_filename: false,
+        type: "upload",
       },
       (error, result) => {
         if (error || !result) {

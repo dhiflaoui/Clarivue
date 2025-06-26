@@ -10,26 +10,42 @@ export const embedPDFToPinecone = async (publicId: string) => {
     if (!userId) {
       throw new Error("Unauthorized");
     }
-    console.log("Attempting to fetch file with publicId:", publicId);
-    let pdfFile = await fetchFileByPublicId(publicId);
-    if (!pdfFile) {
-      throw new Error("Failed to fetch PDF file - file is null or undefined");
-    }
-    console.log("*********File Data*************:", pdfFile);
-    if (pdfFile.format !== "pdf" && pdfFile.resource_type !== "raw") {
+    let pdfFileData = await fetchFileByPublicId(publicId);
+
+    const response = await fetch(pdfFileData.url, {
+      method: "GET",
+      headers: {
+        Accept: "application/pdf",
+      },
+    });
+
+    if (!response.ok) {
       throw new Error(
-        `File is not a PDF. Format: ${pdfFile.format}, Type: ${pdfFile.resource_type}`
+        `Failed to fetch PDF from Cloudinary. Status: ${response.status}`
       );
     }
-    // Split text into small chunks
-    //TODO: check this code the docment retruned is an object
-    // const blob = new Blob([await data?.arraysBuffer()]);
-    // const loader = new PDFLoader(blob);
-    // const documents = await loader.load();
-    let result = "testinggggggg";
-    return result;
+
+    const arrayBuffer = await response.arrayBuffer();
+
+    if (arrayBuffer.byteLength === 0) {
+      throw new Error("PDF file is empty");
+    }
+
+    console.log("✅ PDF downloaded, size:", arrayBuffer.byteLength, "bytes");
+
+    //  Convert ArrayBuffer to File
+    const file = new File([arrayBuffer], `${publicId}.pdf`, {
+      type: "application/pdf",
+    });
+
+    const loader = new PDFLoader(file);
+    const documents = await loader.load();
+
+    return documents.length > 0
+      ? "PDF processed successfully"
+      : "No content extracted";
   } catch (error) {
-    console.error("Error in embedPDFToPinecone:", error);
+    console.error("❌ Error in embedPDFToPinecone:", error);
 
     if (error instanceof Error) {
       throw new Error(`Failed to process PDF: ${error.message}`);

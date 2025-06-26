@@ -182,7 +182,7 @@ const UploadPDF: React.FC<{ onUploadSuccess?: () => void }> = ({
         console.log("*********Upload Result*************:", result);
 
         // Add a small delay to ensure the file is available in Cloudinary
-        await new Promise((resolve) => setTimeout(resolve, 3000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
 
         try {
           const docs = await embedPDFToPinecone(result.publicId);
@@ -205,19 +205,6 @@ const UploadPDF: React.FC<{ onUploadSuccess?: () => void }> = ({
           });
         }
       }
-      //TODO: extract PDF content from file and save it to Pinecone vector database
-      // i have a file url how to get data from it Cloudinary
-      // result.image_metadata
-      // https://cloudinary.com/documentation/image_upload_api_reference#upload_examples
-      // result
-      // fileUrl: "https://res.cloudinary.com/dft2x51oh/raw/upload/v1750820706/pdfs/Fatma-Tawfeek-Frontend-Developer-Vue.pdf"
-      // message :"File \"Fatma-Tawfeek-Frontend-Developer-Vue.pdf\" uploaded successfully"
-      // originalName: "Fatma-Tawfeek-Frontend-Developer-Vue.pdf"
-      // publicId: "pdfs/Fatma-Tawfeek-Frontend-Developer-Vue.pdf"
-      // success: true
-      // console.log("*********Result*************:", result);
-      // const docs = await embedPDFToPinecone(result.publicId);
-      // console.log(docs);
     } catch (error) {
       console.error("Error in handleSubmit:", error);
       setUploadStatus({

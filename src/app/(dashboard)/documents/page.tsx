@@ -15,6 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { embedPDFToPinecone } from "@/actions/pinecone";
 
 const Documents = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -38,6 +39,7 @@ const Documents = () => {
       }
 
       const data = await response.json();
+      console.log("*********Documents Data*************:", data);
       setDocuments(data);
     } catch (err) {
       setError("Error loading documents. Please try again later.");
@@ -96,6 +98,16 @@ const Documents = () => {
 
   const handleUploadSuccess = () => {
     fetchDocuments();
+  };
+  const handleEmbedSuccess = async () => {
+    try {
+      const docs = await embedPDFToPinecone(
+        "pdfs/Fatma-Tawfeek-Frontend-Developer-Vue.pdf"
+      );
+      console.log("*********Embedding Result*************:", docs);
+    } catch (error: any) {
+      console.error("Error embedding PDF:", error);
+    }
   };
   const renderContent = () => {
     if (loading) {
@@ -169,6 +181,16 @@ const Documents = () => {
                   className="w-4 h-4 cursor-pointer hover:text-[#ff612f]"
                   style={{ strokeWidth: "3" }}
                 />
+              </td>
+              <td className="p-4 text-right w-4">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleEmbedSuccess()}
+                  className="h-auto p-0 hover:bg-transparent"
+                >
+                  upload file
+                </Button>
               </td>
               <td className="p-4 text-right w-4">
                 <Button
