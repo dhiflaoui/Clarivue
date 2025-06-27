@@ -153,7 +153,7 @@ const UploadPDF: React.FC<{ onUploadSuccess?: () => void }> = ({
       setIsUploading(false);
     }
   };
-
+  //TODO: refactor this code
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
@@ -185,7 +185,10 @@ const UploadPDF: React.FC<{ onUploadSuccess?: () => void }> = ({
         await new Promise((resolve) => setTimeout(resolve, 1000));
 
         try {
-          const docs = await embedPDFToPinecone(result.publicId);
+          const docs = await embedPDFToPinecone(
+            result.publicId,
+            result.fileUrl
+          );
           console.log("*********Embedding Result*************:", docs);
 
           if (onUploadSuccess) {
@@ -194,7 +197,7 @@ const UploadPDF: React.FC<{ onUploadSuccess?: () => void }> = ({
 
           setTimeout(() => {
             handleOpenDialog();
-          }, 2000);
+          }, 1000);
         } catch (embedError) {
           console.error("Error embedding PDF:", embedError);
           setUploadStatus({
