@@ -91,7 +91,7 @@ const PdfViewer = () => {
       <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
         <Viewer
           plugins={[defaultLayoutPluginInstance]}
-          fileUrl="/pdfFile.pdf"
+          fileUrl="https://res.cloudinary.com/dft2x51oh/raw/upload/v1750980542/pdfs/Fatma-Tawfeek-Frontend-Developer-Vue.pdf"
         />
       </Worker>
     </div>
