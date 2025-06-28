@@ -4,6 +4,11 @@ import { auth } from "@clerk/nextjs/server";
 import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import { Document } from "langchain/document";
 import { CharacterTextSplitter } from "langchain/text_splitter";
+import { indexName } from "@/lib/pinecone";
+import pinecone from "@/lib/pinecone";
+import { PineconeStore } from "langchain/vectorstores/pinecone";
+// import { OpenAIEmbeddings } from "langchain/embeddings/openai";
+import embeddings from "@/lib/HuggingFace";
 
 export const embedPDFToPinecone = async (
   publicId: string,
@@ -47,6 +52,7 @@ export const embedPDFToPinecone = async (
     const loader = new PDFLoader(file);
     const documents = await loader.load();
     console.log("Documents loaded:", documents);
+
     // Trim useless metadata for each document
     const trimDocs = documents.map((doc) => {
       const metadata = { ...doc.metadata };
@@ -56,6 +62,7 @@ export const embedPDFToPinecone = async (
         metadata: metadata,
       });
     });
+
     //Step 2: Split document into smaller chunks
     const splitter = new CharacterTextSplitter({
       separator: "\n",
@@ -63,6 +70,26 @@ export const embedPDFToPinecone = async (
       chunkOverlap: 10,
     });
     const splitDocs = await splitter.splitDocuments(trimDocs);
+
+    // Step 3:connect to the Pinecone Index
+    const index = pinecone.Index(indexName);
+
+    // Step 4: Embeddings document
+
+    // await PineconeStore.fromDocuments(splitDocs, new OpenAIEmbeddings(), {
+    //   pineconeIndex: index,
+    //   namespace: userId,
+    // });
+    //  Create free embeddings using Hugging Face
+
+    // const vectorStore = await PineconeStore.fromDocuments(
+    //   splitDocs,
+    //   embeddings,
+    //   {
+    //     pineconeIndex: index,
+    //     namespace: userId,
+    //   }
+    // );
 
     //TODO: fix this data
     const data = JSON.parse(JSON.stringify(splitDocs));
