@@ -185,11 +185,9 @@ const UploadPDF: React.FC<{ onUploadSuccess?: () => void }> = ({
         await new Promise((resolve) => setTimeout(resolve, 1000));
 
         try {
-          const docs = await embedPDFToPinecone(
-            result.publicId,
-            result.fileUrl
-          );
-          console.log("*********Embedding Result*************:", docs);
+          // const docs =
+          await embedPDFToPinecone(result.publicId, result.fileUrl);
+          // console.log("*********Embedding Result*************:", docs);
 
           if (onUploadSuccess) {
             onUploadSuccess();

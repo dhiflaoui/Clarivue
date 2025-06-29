@@ -7,11 +7,10 @@ import { CharacterTextSplitter } from "langchain/text_splitter";
 import { indexName } from "@/lib/pinecone";
 import pinecone from "@/lib/pinecone";
 import { PineconeStore } from "langchain/vectorstores/pinecone";
-// import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import embeddings from "@/lib/HuggingFace";
-
+//TODO reafcator this page
 export const embedPDFToPinecone = async (
-  publicId: string,
+  filePublicId: string,
   pdfFileUrl: string
 ) => {
   console.log("********* PDF Url*************:", pdfFileUrl);
@@ -22,7 +21,7 @@ export const embedPDFToPinecone = async (
       throw new Error("Unauthorized");
     }
     //TODO : delete this code
-    // let pdfFileData = await fetchFileByPublicId(publicId);
+    // let pdfFileData = await fetchFileByPublicId(filePublicId);
 
     const pdfFile = await fetch(pdfFileUrl, {
       method: "GET",
@@ -45,7 +44,7 @@ export const embedPDFToPinecone = async (
     console.log("PDF downloaded, size:", arrayBuffer.byteLength, "bytes");
 
     //  Convert ArrayBuffer to File
-    const file = new File([arrayBuffer], `${publicId}.pdf`, {
+    const file = new File([arrayBuffer], `${filePublicId}.pdf`, {
       type: "application/pdf",
     });
 
@@ -75,25 +74,18 @@ export const embedPDFToPinecone = async (
     const index = pinecone.Index(indexName);
 
     // Step 4: Embeddings document
-
-    // await PineconeStore.fromDocuments(splitDocs, new OpenAIEmbeddings(), {
-    //   pineconeIndex: index,
-    //   namespace: userId,
-    // });
-    //  Create free embeddings using Hugging Face
-
-    // const vectorStore = await PineconeStore.fromDocuments(
-    //   splitDocs,
-    //   embeddings,
-    //   {
-    //     pineconeIndex: index,
-    //     namespace: userId,
-    //   }
-    // );
+    try {
+      await PineconeStore.fromDocuments(splitDocs, embeddings, {
+        pineconeIndex: index,
+        namespace: filePublicId,
+      });
+    } catch (error) {
+      console.error("❌ Error in embedPDFToPinecone:", error);
+    }
 
     //TODO: fix this data
-    const data = JSON.parse(JSON.stringify(splitDocs));
-    return documents.length > 0 ? data : [];
+    // const data = JSON.parse(JSON.stringify(splitDocs));
+    // return documents.length > 0 ? data : [];
   } catch (error) {
     console.error("❌ Error in embedPDFToPinecone:", error);
 
