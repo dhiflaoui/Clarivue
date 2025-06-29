@@ -160,8 +160,13 @@ const Documents = () => {
                   className="w-4 h-4 mr-2 text-[#ff612f]"
                   style={{ strokeWidth: "3" }}
                 />
+                {/* Display file name with link 
+                
+                href={document.fileUrl}
+                
+                */}
                 <a
-                  href={document.fileUrl}
+                  href=""
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:underline"

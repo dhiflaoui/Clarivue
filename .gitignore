@@ -137,3 +137,7 @@ dist
 
 # TODO.md
 TODO.md
+
+/prisma/prisma-client
+
+

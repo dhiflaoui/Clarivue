@@ -43,7 +43,7 @@ export const embedPDFToPinecone = async (
 
     console.log("PDF downloaded, size:", arrayBuffer.byteLength, "bytes");
 
-    //  Convert ArrayBuffer to File
+    // Convert ArrayBuffer to File
     const file = new File([arrayBuffer], `${filePublicId}.pdf`, {
       type: "application/pdf",
     });

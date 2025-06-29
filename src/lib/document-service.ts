@@ -1,14 +1,33 @@
+import { auth } from "@clerk/nextjs/server";
 import cloudinary from "./cloudinary";
+import prismadb from "@/lib/prisma";
 
+//TODO: fix this interface a=nd delete the unused ones
 export interface Document {
   id: string;
-  public_id: string;
+  userName: string;
+  userId: string;
+  fileKey: string;
   fileName: string;
-  fileUrl: string;
   fileSize: string;
   createdAt: string;
 }
-
+interface CloudinaryResource {
+  public_id: string;
+  format: string;
+  version: number;
+  resource_type: string;
+  type: string;
+  created_at: string;
+  bytes: number;
+  width: number;
+  height: number;
+  url: string;
+  secure_url: string;
+  tags: string[];
+  context?: Record<string, any>;
+  metadata?: Record<string, any>;
+}
 export interface DeleteResult {
   success: boolean;
   message?: string;
@@ -37,53 +56,50 @@ function isCloudinaryError(error: unknown): error is CloudinaryError {
 }
 
 export async function getAllDocuments(): Promise<Document[]> {
+  const { userId } = await auth();
+
+  if (!userId) {
+    console.warn("No user ID found, returning empty documents array");
+    return [];
+  }
+
   try {
-    const result = await cloudinary.api.resources({
-      type: "upload",
-      resource_type: "raw",
-      prefix: "pdfs/",
-      max_results: 100,
+    const result = await prismadb.document.findMany({
+      where: {
+        userId: userId,
+      },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        userId: true,
+        userName: true,
+        fileKey: true,
+        fileName: true,
+        fileSize: true,
+        createdAt: true,
+      },
     });
 
-    if (!result?.resources) {
-      return [];
-    }
+    return result.map((resource) => {
+      const fileSize = formatFileSize(resource.fileSize ?? 0);
+      const createdAt = formatCreatedDate(new Date(resource.createdAt));
 
-    return result.resources.map((resource: CloudinaryResource) => {
-      const public_id = resource.public_id.split("/").pop() ?? "";
-
-      const fileSize = formatFileSize(resource.bytes);
-      const createdAt = formatCreatedDate(new Date(resource.created_at));
       return {
-        id: resource.asset_id,
-        public_id: resource.public_id,
-        fileName: public_id,
-        fileUrl: resource.secure_url,
+        id: resource.id,
+        userName: resource.userName ?? "Unknown User",
+        userId: resource.userId ?? "",
+        fileKey: resource.fileKey ?? "",
+        fileName: resource.fileName ?? "Untitled Document",
         fileSize,
         createdAt,
       };
     });
   } catch (error) {
-    console.error("Error fetching documents:", error);
+    console.error("Error fetching documents from database:", error);
     return [];
   }
 }
-interface CloudinaryResource {
-  public_id: string;
-  format: string;
-  version: number;
-  resource_type: string;
-  type: string;
-  created_at: string;
-  bytes: number;
-  width: number;
-  height: number;
-  url: string;
-  secure_url: string;
-  tags: string[];
-  context?: Record<string, any>;
-  metadata?: Record<string, any>;
-}
+
 //TODO:delete this after success getting file with url
 export async function fetchFileByPublicId(
   publicId: string
