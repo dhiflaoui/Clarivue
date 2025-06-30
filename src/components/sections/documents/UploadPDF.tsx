@@ -14,6 +14,7 @@ import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { showToast } from "@/lib/utils";
 import { embedPDFToPinecone } from "@/actions/pinecone";
+import { useRouter } from "next/navigation";
 
 const UploadPDF: React.FC<{ onUploadSuccess?: () => void }> = ({
   onUploadSuccess,
@@ -28,8 +29,9 @@ const UploadPDF: React.FC<{ onUploadSuccess?: () => void }> = ({
     message: string;
     fileUrl?: string;
     originalName?: string;
+    docId?: string;
   } | null>(null);
-
+  const router = useRouter();
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
 
@@ -101,6 +103,7 @@ const UploadPDF: React.FC<{ onUploadSuccess?: () => void }> = ({
           fileUrl: data.url,
           publicId: data.public_id,
           originalName: file.name,
+          docId: data.docId,
         };
       } else {
         throw new Error(data.error ?? "Upload failed");
@@ -139,6 +142,7 @@ const UploadPDF: React.FC<{ onUploadSuccess?: () => void }> = ({
           fileUrl: data.url,
           publicId: data.public_id,
           originalName: filename,
+          docId: data.docId,
         };
       } else {
         throw new Error(data.error ?? "URL upload failed");
@@ -153,59 +157,11 @@ const UploadPDF: React.FC<{ onUploadSuccess?: () => void }> = ({
       setIsUploading(false);
     }
   };
-  //TODO: refactor this code
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      let result;
-
-      if (file) {
-        result = await uploadToCloudinary(file);
-      } else if (url) {
-        result = await uploadUrlToCloudinary(url);
-      } else {
-        setUploadStatus({
-          success: false,
-          message: "Please select a file or enter a URL",
-        });
-        return;
-      }
-
-      setUploadStatus({
-        success: result.success,
-        message: result.message,
-        fileUrl: result.fileUrl,
-        originalName: result.originalName,
-      });
-
-      if (result.success && result.publicId) {
-        console.log("*********Upload Result*************:", result);
-
-        // Add a small delay to ensure the file is available in Cloudinary
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        try {
-          // const docs =
-          await embedPDFToPinecone(result.publicId, result.fileUrl);
-          // console.log("*********Embedding Result*************:", docs);
-
-          if (onUploadSuccess) {
-            onUploadSuccess();
-          }
-
-          setTimeout(() => {
-            handleOpenDialog();
-          }, 1000);
-        } catch (embedError) {
-          console.error("Error embedding PDF:", embedError);
-          setUploadStatus({
-            success: false,
-            message: `Upload successful but embedding failed: ${
-              embedError instanceof Error ? embedError.message : "Unknown error"
-            }`,
-          });
-        }
-      }
+      await ProcessPdf();
     } catch (error) {
       console.error("Error in handleSubmit:", error);
       setUploadStatus({
@@ -214,6 +170,55 @@ const UploadPDF: React.FC<{ onUploadSuccess?: () => void }> = ({
           error instanceof Error ? error.message : "Unknown error"
         }`,
       });
+    }
+  };
+
+  const ProcessPdf = async () => {
+    let result;
+
+    if (file) {
+      result = await uploadToCloudinary(file);
+    } else if (url) {
+      result = await uploadUrlToCloudinary(url);
+    } else {
+      setUploadStatus({
+        success: false,
+        message: "Please select a file or enter a URL",
+      });
+      return;
+    }
+
+    setUploadStatus({
+      success: result.success,
+      message: result.message,
+      fileUrl: result.fileUrl,
+      originalName: result.originalName,
+      docId: result.docId,
+    });
+
+    if (result.success && result.publicId) {
+      console.log("*********Upload Result*************:", result);
+
+      try {
+        await embedPDFToPinecone(result.publicId, result.fileUrl);
+
+        if (onUploadSuccess) {
+          onUploadSuccess();
+          router.push(`/documents/${result.docId}`);
+        }
+
+        setTimeout(() => {
+          handleOpenDialog();
+        }, 1000);
+      } catch (embedError) {
+        console.error("Error embedding PDF:", embedError);
+        setUploadStatus({
+          success: false,
+          message: `Upload successful but embedding failed: ${
+            embedError instanceof Error ? embedError.message : "Unknown error"
+          }`,
+        });
+      }
     }
   };
   return (

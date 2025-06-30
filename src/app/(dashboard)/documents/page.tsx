@@ -15,7 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { embedPDFToPinecone } from "@/actions/pinecone";
+
 
 const Documents = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -26,7 +26,7 @@ const Documents = () => {
   const [documentToDelete, setDocumentToDelete] = useState<Document | null>(
     null
   );
-
+  
   const fetchDocuments = async () => {
     try {
       setLoading(true);
@@ -97,19 +97,9 @@ const Documents = () => {
 
   const handleUploadSuccess = () => {
     fetchDocuments();
+   
   };
 
-  const handleUp = async () => {
-    try {
-      const result = await embedPDFToPinecone(
-        process.env.FILECODE!,
-        process.env.FILEURL!
-      );
-      console.log("**********result**********************", result);
-    } catch (error: any) {
-      console.error("error fetch data", error);
-    }
-  };
   const renderContent = () => {
     if (loading) {
       return (
@@ -187,16 +177,6 @@ const Documents = () => {
                   className="w-4 h-4 cursor-pointer hover:text-[#ff612f]"
                   style={{ strokeWidth: "3" }}
                 />
-              </td>
-              <td className="p-4 text-right w-4">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleUp()}
-                  className="h-auto p-0 hover:bg-transparent"
-                >
-                  Upload data
-                </Button>
               </td>
               <td className="p-4 text-right w-4">
                 <Button

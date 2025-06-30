@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import cloudinary from "@/lib/cloudinary";
+import { addPdfFileDetails } from "@/lib/document-service";
 
 interface UploadResponse {
   url: string;
   public_id: string;
+  docId: string;
 }
 
 interface ErrorResponse {
@@ -41,10 +43,16 @@ export async function POST(
     const filenameWithoutExt = originalFilename.replace(/\.[^/.]+$/, "");
 
     const result = await uploadToCloudinary(bytes, filenameWithoutExt);
-
+    const document = await addPdfFileDetails({
+      fileName: file.name,
+      fileSize: file.size,
+      fileKey: result.public_id,
+      fileUrl: result.secure_url,
+    });
     return NextResponse.json({
       url: result.secure_url,
       public_id: result.public_id,
+      docId: document.id,
     });
   } catch (error) {
     console.error("Upload error:", error);

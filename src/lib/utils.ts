@@ -12,3 +12,11 @@ export function showToast(
 ) {
   toast(message, { type, className: "foo-bar", position: "top-right" });
 }
+
+export function formatFileSize(bytes: number): string {
+  const fileSizeKB = Math.round(bytes / 1024);
+
+  return fileSizeKB > 1024
+    ? `${(fileSizeKB / 1024).toFixed(1)} MB`
+    : `${fileSizeKB} KB`;
+}

@@ -1,13 +1,15 @@
 import { NextResponse } from "next/server";
 import { getAllDocuments, Document } from "@/lib/document-service";
+import { auth } from "@clerk/nextjs/server";
 
 interface ErrorResponse {
   error: string;
 }
 
 export async function GET(): Promise<NextResponse<Document[] | ErrorResponse>> {
+  const { userId } = await auth();
   try {
-    const documents = await getAllDocuments();
+    const documents = await getAllDocuments(userId ?? "");
     return NextResponse.json(documents);
   } catch (error) {
     const errorMessage =

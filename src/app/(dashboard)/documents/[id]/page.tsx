@@ -1,12 +1,21 @@
-"use client";
-
 import Chat from "@/components/chat/Chat";
 import PdfViewer from "@/components/chat/PdfViewer";
+import { getDocumentById } from "@/lib/document-service";
+import { redirect } from "next/navigation";
+interface Props {
+  params: {
+    id: string;
+  };
+}
+const ChatPage = async ({ params: { id } }: Props) => {
+  const document = await getDocumentById(id);
+  if (!document) {
+    redirect("/documents");
+  }
 
-const ChatPage = () => {
   return (
     <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
-      <PdfViewer />
+      <PdfViewer fileUrl={document.fileUrl} />
       <Chat />
     </div>
   );

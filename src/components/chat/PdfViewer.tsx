@@ -11,8 +11,10 @@ import {
 import "@react-pdf-viewer/core/lib/styles/index.css";
 import "@react-pdf-viewer/default-layout/lib/styles/index.css";
 import { ReactElement } from "react";
-
-const PdfViewer = () => {
+interface PdfViewerProps {
+  fileUrl: string;
+}
+const PdfViewer = ({ fileUrl }: PdfViewerProps) => {
   const renderToolbar = (Toolbar: (props: ToolbarProps) => ReactElement) => (
     <Toolbar>
       {(slots: ToolbarSlot) => {
@@ -89,10 +91,7 @@ const PdfViewer = () => {
       }}
     >
       <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
-        <Viewer
-          plugins={[defaultLayoutPluginInstance]}
-          fileUrl="https://res.cloudinary.com/dft2x51oh/raw/upload/v1750980542/pdfs/Fatma-Tawfeek-Frontend-Developer-Vue.pdf"
-        />
+        <Viewer plugins={[defaultLayoutPluginInstance]} fileUrl={fileUrl} />
       </Worker>
     </div>
   );
