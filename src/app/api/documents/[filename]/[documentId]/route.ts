@@ -1,5 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
-import { deleteDocument, DeleteResult } from "@/lib/document-service";
+import { deleteDocumentById } from "@/actions/db";
+import { deleteDocumentCloudinary } from "@/actions/storage";
+import { deleteFromNamespace } from "@/actions/pinecone";
 
 interface SuccessResponse {
   success: true;
@@ -9,20 +11,18 @@ interface ErrorResponse {
 }
 
 export async function DELETE(
-  request: NextRequest
+  request: NextRequest,
+  { params }: { params: { filename: string; documentId: string } }
 ): Promise<NextResponse<SuccessResponse | ErrorResponse>> {
+  const { filename, documentId } = params;
+  const fullPublicId = `pdfs/${decodeURIComponent(filename)}`;
+
   try {
-    const url = new URL(request.url);
-    const public_id = decodeURIComponent(url.pathname.split("/").pop() || "");
-
-    const fullPublicId = `pdfs/${public_id}`;
-
-    console.log("public_id in api routes", public_id);
-
-    const result: DeleteResult = await deleteDocument(fullPublicId);
-    console.log("deleteDocument in api routes", result);
+    const result = await deleteDocumentCloudinary(fullPublicId);
 
     if (result.success) {
+      await deleteDocumentById(documentId);
+      await deleteFromNamespace(fullPublicId);
       return NextResponse.json({ success: true });
     } else {
       return NextResponse.json(
@@ -33,8 +33,6 @@ export async function DELETE(
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : "Failed to delete document";
-    console.error("Error in delete document API:", error);
-
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

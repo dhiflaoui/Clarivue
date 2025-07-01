@@ -3,7 +3,7 @@
 import UploadPDF from "@/components/sections/documents/UploadPDF";
 import { File, Pencil, Trash2, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Document } from "@/lib/document-service";
+import { Document } from "@/actions/db";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -16,7 +16,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-
 const Documents = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,7 +25,7 @@ const Documents = () => {
   const [documentToDelete, setDocumentToDelete] = useState<Document | null>(
     null
   );
-  
+
   const fetchDocuments = async () => {
     try {
       setLoading(true);
@@ -62,15 +61,19 @@ const Documents = () => {
 
     try {
       setDeletingId(documentToDelete.id);
-      const filename = documentToDelete.public_id.split("/").pop();
+      const filename = documentToDelete.fileKey.split("/").pop();
+      const documentId = documentToDelete.id;
       if (!filename) {
-        throw new Error("Invalid public_id structure.");
+        throw new Error("Invalid fileKey structure.");
       }
-      const apiUrl = `/api/documents/${encodeURIComponent(filename)}/`;
+      const apiUrl = `/api/documents/${encodeURIComponent(
+        filename
+      )}/${encodeURIComponent(documentId)}/`;
       console.log("Delete API URL:", apiUrl);
       const response = await fetch(apiUrl, {
         method: "DELETE",
       });
+      console.log("Delete API response status:", response);
       let responseData;
       try {
         responseData = await response.json();
@@ -97,7 +100,6 @@ const Documents = () => {
 
   const handleUploadSuccess = () => {
     fetchDocuments();
-   
   };
 
   const renderContent = () => {

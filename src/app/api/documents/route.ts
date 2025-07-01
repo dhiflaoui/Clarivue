@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAllDocuments, Document } from "@/lib/document-service";
+import { getAllDocuments, Document } from "@/actions/db";
 import { auth } from "@clerk/nextjs/server";
 
 interface ErrorResponse {

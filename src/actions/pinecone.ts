@@ -1,5 +1,5 @@
 "use server";
-import { fetchFileByPublicId } from "@/lib/document-service";
+
 import { auth } from "@clerk/nextjs/server";
 import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import { Document } from "langchain/document";
@@ -13,7 +13,6 @@ export const embedPDFToPinecone = async (
   filePublicId: string,
   pdfFileUrl: string
 ) => {
-  console.log("********* PDF Url*************:", pdfFileUrl);
   try {
     const { userId } = await auth();
 
@@ -96,3 +95,17 @@ export const embedPDFToPinecone = async (
     throw new Error("Failed to process PDF: Unknown error occurred");
   }
 };
+
+export async function deleteFromNamespace(namespaceName: string) {
+  console.log("Deleting from namespace:", namespaceName);
+  try {
+    const index = pinecone.index(indexName);
+    const namespace = index.namespace(namespaceName);
+    console.log("namespace: ", namespace);
+    await namespace.deleteAll();
+    console.log(`All vectors deleted from namespace: ${namespaceName}`);
+  } catch (error) {
+    console.error("Error deleting from Pinecone:", error);
+    throw error;
+  }
+}

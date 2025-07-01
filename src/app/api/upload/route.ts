@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import cloudinary from "@/lib/cloudinary";
-import { addPdfFileDetails } from "@/lib/document-service";
+import { addPdfFileDetails } from "@/actions/db";
 
 interface UploadResponse {
   url: string;

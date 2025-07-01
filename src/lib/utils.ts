@@ -20,3 +20,16 @@ export function formatFileSize(bytes: number): string {
     ? `${(fileSizeKB / 1024).toFixed(1)} MB`
     : `${fileSizeKB} KB`;
 }
+export function formatCreatedDate(createdDate: Date): string {
+  const now = new Date();
+  const diffDays = Math.floor(
+    (now.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24)
+  );
+
+  if (diffDays === 0) return "today";
+  if (diffDays === 1) return "yesterday";
+  if (diffDays < 7) return `${diffDays} days ago`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+
+  return createdDate.toLocaleDateString();
+}

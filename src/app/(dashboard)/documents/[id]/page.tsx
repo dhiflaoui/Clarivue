@@ -1,14 +1,18 @@
 import Chat from "@/components/chat/Chat";
 import PdfViewer from "@/components/chat/PdfViewer";
-import { getDocumentById } from "@/lib/document-service";
+import { getDocumentById } from "@/actions/db";
 import { redirect } from "next/navigation";
+
 interface Props {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
-const ChatPage = async ({ params: { id } }: Props) => {
+
+const ChatPage = async ({ params }: Props) => {
+  const { id } = await params;
   const document = await getDocumentById(id);
+
   if (!document) {
     redirect("/documents");
   }
