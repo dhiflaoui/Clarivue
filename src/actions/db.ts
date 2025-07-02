@@ -2,6 +2,7 @@ import prismadb from "@/lib/prisma";
 import { formatCreatedDate, formatFileSize } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
 import { currentUser } from "@clerk/nextjs/server";
+import { DeleteResult } from "./storage";
 interface DocumentResult {
   id: string;
   userId: string;
@@ -186,7 +187,39 @@ export async function deleteDocumentById(id: string): Promise<DeleteResult> {
   } catch (error) {
     return {
       success: false,
-      message: "Failed to delete from database",
+      message: `Failed to delete from database: ${error}`,
     };
+  }
+}
+export async function updateDocumentName(
+  id: string,
+  newName: string
+): Promise<void | null> {
+  const user = await currentUser();
+  if (!user) {
+    console.warn("No user found, returning null");
+    throw new Error("User not authenticated");
+  }
+  if (!id) {
+    console.warn("No document ID provided, returning null");
+    return null;
+  } else if (!newName.trim()) {
+    console.warn("New document name is empty, returning null");
+    throw new Error("Document name cannot be empty");
+  } else if (newName.length > 100) {
+    console.warn("New document name is too long, returning null");
+    throw new Error("Document name cannot exceed 100 characters");
+  }
+
+  try {
+    await prismadb.document.update({
+      where: { id, userId: user.id },
+      data: { fileName: newName },
+    });
+
+    revalidatePath("/documents");
+  } catch (error) {
+    console.error("Error updating document name:", error);
+    return null;
   }
 }

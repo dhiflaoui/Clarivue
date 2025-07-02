@@ -1,7 +1,7 @@
 "use client";
 
 import UploadPDF from "@/components/sections/documents/UploadPDF";
-import { File, Pencil, Trash2, Loader2 } from "lucide-react";
+import { File, Pencil, Trash2, Loader2, MessagesSquare } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Document } from "@/actions/db";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import UpdatePDF from "@/components/sections/documents/UpdatePDF";
 
 const Documents = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -101,7 +102,9 @@ const Documents = () => {
   const handleUploadSuccess = () => {
     fetchDocuments();
   };
-
+  const handleUpdateSuccess = () => {
+    fetchDocuments();
+  };
   const renderContent = () => {
     if (loading) {
       return (
@@ -175,9 +178,10 @@ const Documents = () => {
                 {document.createdAt}
               </td>
               <td className="p-4 text-right w-4">
-                <Pencil
-                  className="w-4 h-4 cursor-pointer hover:text-[#ff612f]"
-                  style={{ strokeWidth: "3" }}
+                <UpdatePDF
+                  onUpdateSuccess={handleUpdateSuccess}
+                  docCurrentName={document.fileName}
+                  documentId={document.id}
                 />
               </td>
               <td className="p-4 text-right w-4">
@@ -209,10 +213,23 @@ const Documents = () => {
       <div className="section-container">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-2xl">Documents</h1>
-          <UploadPDF onUploadSuccess={handleUploadSuccess} />
+        </div>
+        <div className="flex gap-4">
+          <input
+            type="text"
+            placeholder="Search documents..."
+            className="border rounded px-3 py-2 w-[80%] bg-white"
+          />
+          <div className="flex items-end gap-2">
+            <UploadPDF onUploadSuccess={handleUploadSuccess} />
+            <Button variant="outline" className="bg-[#062427] text-white">
+              <MessagesSquare />
+              All Chat
+            </Button>
+          </div>
         </div>
 
-        <div className="bg-white rounded shadow w-full overflow-x-auto">
+        <div className="bg-white rounded shadow w-full overflow-x-auto mt-4">
           {renderContent()}
         </div>
       </div>
