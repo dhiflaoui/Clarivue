@@ -1,7 +1,7 @@
 "use client";
 
 import UploadPDF from "@/components/sections/documents/UploadPDF";
-import { File, Pencil, Trash2, Loader2, MessagesSquare } from "lucide-react";
+import { File, Trash2, Loader2, MessagesSquare } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Document } from "@/actions/db";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import UpdatePDF from "@/components/sections/documents/UpdatePDF";
+import Link from "next/link";
 
 const Documents = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -155,21 +156,14 @@ const Documents = () => {
                   className="w-4 h-4 mr-2 text-[#ff612f]"
                   style={{ strokeWidth: "3" }}
                 />
-                {/* Display file name with link 
-                
-                href={document.fileUrl}
-                
-                */}
-                <a
-                  href=""
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <Link
                   className="hover:underline"
+                  href={`/documents/${document.id}`}
                 >
                   <span className="text-ellipsis overflow-hidden whitespace-normal max-w-[300px] text-sm font-medium">
                     {document.fileName}
                   </span>
-                </a>
+                </Link>
               </td>
               <td className="p-4 text-right text-sm text-gray-500 whitespace-nowrap w-20">
                 {document.fileSize}

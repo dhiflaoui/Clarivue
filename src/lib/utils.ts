@@ -33,3 +33,11 @@ export function formatCreatedDate(createdDate: Date): string {
 
   return createdDate.toLocaleDateString();
 }
+
+export function scrollToBottom(
+  messageEndRef: React.RefObject<HTMLDivElement | null>
+) {
+  if (messageEndRef.current) {
+    messageEndRef.current.scrollIntoView({ behavior: "smooth" });
+  }
+}

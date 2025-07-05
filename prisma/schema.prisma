@@ -15,14 +15,31 @@ datasource db {
 }
 
 model Document {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   userId    String
   userName  String?
   fileName  String?
   fileSize  Int?
-  fileKey   String?  @unique
+  fileKey   String?   @unique
   fileUrl   String?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
+  messages  Message[]
 
   @@index([userId], name: "idx_document_userId")
+}
+
+enum Role {
+  user
+  assistant
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  role       Role
+  content    String   @db.Text
+  documentId String
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@index([documentId])
 }

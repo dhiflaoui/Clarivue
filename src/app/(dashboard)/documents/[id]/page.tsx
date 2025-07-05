@@ -20,7 +20,7 @@ const ChatPage = async ({ params }: Props) => {
   return (
     <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
       <PdfViewer fileUrl={document.fileUrl} />
-      <Chat />
+      <Chat document={document} />
     </div>
   );
 };

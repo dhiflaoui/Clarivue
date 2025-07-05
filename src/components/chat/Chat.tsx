@@ -1,38 +1,33 @@
-import React from "react";
-import { Bot, Send, User } from "lucide-react";
+"use client";
+import React, { useEffect, useRef } from "react";
+import { Bot, Loader2, Send, User } from "lucide-react";
 import { Button } from "../ui/button";
-import { cn } from "@/lib/utils";
-
-const Chat = () => {
-  const messages = [
-    {
-      role: "user",
-      content: "Hello",
-    },
-    // {
-    //   role: "bot",
-    //   content:
-    //     "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
-    // },
-    // {
-    //   role: "user",
-    //   content: "Hello",
-    // },
-    // {
-    //   role: "bot",
-    //   content:
-    //     "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
-    // },
-    // {
-    //   role: "user",
-    //   content: "Hello",
-    // },
-    // {
-    //   role: "bot",
-    //   content:
-    //     "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
-    // },
-  ];
+import { cn, scrollToBottom } from "@/lib/utils";
+import { useChat } from "ai/react";
+import { Document } from "@/actions/db";
+interface Props {
+  document: Document;
+}
+const Chat = ({ document }: Props) => {
+  const { messages, input, handleInputChange, handleSubmit, isLoading } =
+    useChat({
+      api: "/api/chat",
+      body: {
+        fileKey: document.fileKey,
+        documentId: document.id,
+      },
+      initialMessages: [
+        {
+          id: "1",
+          role: "user",
+          content: "Hello",
+        },
+      ],
+    });
+  const messageRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    scrollToBottom(messageRef);
+  }, [messages]);
   return (
     <div
       className="w-1/2 mt-15 overflow-scroll bg-white"
@@ -43,12 +38,12 @@ const Chat = () => {
       }}
     >
       <div className="h-full flex flex-col justify-between">
-        {/* messge */}
+        {/* Messages */}
         <div className="overflow-auto bg-white">
           <div className="flex flex-col">
             {messages.map((message) => (
               <div
-                key={message.content}
+                key={message.id}
                 className={cn(
                   "p-6 w-full flex items-start gap-x-8",
                   message.role === "user" ? "bg-white" : "bg-[#faf9f6]"
@@ -66,19 +61,53 @@ const Chat = () => {
                 </div>
               </div>
             ))}
+            {isLoading && (
+              <div className="p-6 w-full flex items-start gap-x-8 bg-[#faf9f6]">
+                <div className="w-4">
+                  <Bot className="bg-[#062427] text-white rounded-sm p-1" />
+                </div>
+                <div className="text-sm font-light overflow-hidden leading-7">
+                  <div className="flex items-center space-x-1">
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                    <div
+                      className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                      style={{ animationDelay: "0.1s" }}
+                    ></div>
+                    <div
+                      className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                      style={{ animationDelay: "0.2s" }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
+          <div ref={messageRef}></div>
         </div>
         {/* Form */}
         <div className="bg-[#faf9f6]">
-          <form className="m-4 p-2 item-center justify-between rounded-md border-[#e5e3da] border bg-white flex">
+          <form
+            onSubmit={handleSubmit}
+            className="m-4 p-2 item-center justify-between rounded-md border-[#e5e3da] border bg-white flex"
+          >
             <input
               type="text"
               placeholder="Ask a question"
-              className="border-none outline-none focus-visible:ring-0 focus-visible:ring-transparent"
+              value={input}
+              onChange={handleInputChange}
+              disabled={isLoading}
+              className="flex-1 border-none outline-none focus-visible:ring-0 focus-visible:ring-transparent disabled:opacity-50"
             />
-            <Button variant="orange">
-              <Send className="w-4 h-4" />
-            </Button>
+            {isLoading ? (
+              <Loader2
+                className="h-5 w-5 text-[#ff612f]/70 animate-spin"
+                style={{ strokeWidth: "3" }}
+              />
+            ) : (
+              <Button variant="orange" type="submit">
+                <Send className="w-4 h-4" />
+              </Button>
+            )}
           </form>
         </div>
       </div>
