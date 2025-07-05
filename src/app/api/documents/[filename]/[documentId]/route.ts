@@ -12,9 +12,9 @@ interface ErrorResponse {
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { filename: string; documentId: string } }
+  { params }: { params: Promise<{ filename: string; documentId: string }> }
 ): Promise<NextResponse<SuccessResponse | ErrorResponse>> {
-  const { filename, documentId } = params;
+  const { filename, documentId } = await params;
   const fullPublicId = `pdfs/${decodeURIComponent(filename)}`;
 
   try {
