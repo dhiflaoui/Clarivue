@@ -60,7 +60,6 @@ export async function deleteDocumentCloudinary(
     };
   }
 }
-
 async function resourceExists(public_id: string): Promise<boolean> {
   try {
     await cloudinary.api.resource(public_id, {

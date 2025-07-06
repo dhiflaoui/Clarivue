@@ -3,6 +3,7 @@ import { formatCreatedDate, formatFileSize } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
 import { currentUser } from "@clerk/nextjs/server";
 import { DeleteResult } from "./storage";
+import { needToUpgrade } from "@/lib/subscription";
 interface DocumentResult {
   id: string;
   userId: string;
@@ -97,7 +98,12 @@ export async function addPdfFileDetails(
   if (!fileKey.trim()) {
     throw new Error("File key is required");
   }
-
+  const reachedFreeQuota = await needToUpgrade();
+  if (reachedFreeQuota) {
+    throw new Error(
+      "You have reached the limit of free documents. Please upgrade your plan to add more documents."
+    );
+  }
   try {
     const document = await prismadb.document.create({
       data: {
@@ -142,15 +148,12 @@ export async function getDocumentById(id: string): Promise<Document | null> {
   try {
     const resource = await prismadb.document.findUnique({
       where: { id, userId: user.id },
-      select: {
-        id: true,
-        userId: true,
-        userName: true,
-        fileKey: true,
-        fileName: true,
-        fileSize: true,
-        fileUrl: true,
-        createdAt: true,
+      include: {
+        messages: {
+          orderBy: {
+            createdAt: "asc",
+          },
+        },
       },
     });
 

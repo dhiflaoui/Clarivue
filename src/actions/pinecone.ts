@@ -8,6 +8,7 @@ import { indexName } from "@/lib/pinecone";
 import pinecone from "@/lib/pinecone";
 import { PineconeStore } from "langchain/vectorstores/pinecone";
 import embeddings from "@/lib/HuggingFace";
+import { needToUpgrade } from "@/lib/subscription";
 //TODO reafcator this page
 export const embedPDFToPinecone = async (
   filePublicId: string,
@@ -19,9 +20,12 @@ export const embedPDFToPinecone = async (
     if (!userId) {
       throw new Error("Unauthorized");
     }
-    //TODO : delete this code
-    // let pdfFileData = await fetchFileByPublicId(filePublicId);
-
+    const reachedFreeQuota = await needToUpgrade();
+    if (reachedFreeQuota) {
+      throw new Error(
+        "You have reached the limit of free documents. Please upgrade your plan to add more documents."
+      );
+    }
     const pdfFile = await fetch(pdfFileUrl, {
       method: "GET",
       headers: {
