@@ -4,10 +4,13 @@ import { Bot, Loader2, Send, User } from "lucide-react";
 import { Button } from "../ui/button";
 import { cn, scrollToBottom } from "@/lib/utils";
 import { useChat } from "ai/react";
-import { Document } from "@/actions/db";
+import { Document, Message as MessageDB } from "../../../prisma/prisma-client";
 interface Props {
-  document: Document;
+  document: Document & {
+    messages: MessageDB[];
+  };
 }
+
 const Chat = ({ document }: Props) => {
   const { messages, input, handleInputChange, handleSubmit, isLoading } =
     useChat({
@@ -16,13 +19,7 @@ const Chat = ({ document }: Props) => {
         fileKey: document.fileKey,
         documentId: document.id,
       },
-      initialMessages: [
-        {
-          id: "1",
-          role: "user",
-          content: "Hello",
-        },
-      ],
+      initialMessages: document.messages,
     });
   const messageRef = useRef<HTMLDivElement>(null);
   useEffect(() => {

@@ -1,5 +1,5 @@
+import { Document, Message } from "../../prisma/prisma-client";
 import prismadb from "@/lib/prisma";
-import { formatCreatedDate, formatFileSize } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
 import { currentUser } from "@clerk/nextjs/server";
 import { DeleteResult } from "./storage";
@@ -19,18 +19,10 @@ interface AddPdfParams {
   fileKey: string;
   fileUrl: string;
 }
-
-export interface Document {
-  id: string;
-  userName: string;
-  userId: string;
-  fileKey: string;
-  fileName: string;
-  fileSize: string;
-  fileUrl: string;
-  createdAt: string;
+interface DocumentWithMessages extends Document {
+  messages: Message[];
 }
-
+//TODO: try to refactor this to use the DocumentWithMessages type
 export async function getAllDocuments(userId: string): Promise<Document[]> {
   if (!userId) {
     console.warn("No user ID found, returning empty documents array");
@@ -56,18 +48,15 @@ export async function getAllDocuments(userId: string): Promise<Document[]> {
     });
 
     return result.map((resource) => {
-      const fileSize = formatFileSize(resource.fileSize ?? 0);
-      const createdAt = formatCreatedDate(new Date(resource.createdAt));
-
       return {
         id: resource.id,
         userName: resource.userName ?? "Unknown User",
         userId: resource.userId ?? "",
         fileKey: resource.fileKey ?? "",
         fileName: resource.fileName ?? "Untitled Document",
-        fileSize,
+        fileSize: resource.fileSize ?? 0,
         fileUrl: resource.fileUrl ?? "",
-        createdAt,
+        createdAt: resource.createdAt ?? new Date(),
       };
     });
   } catch (error) {
@@ -128,7 +117,9 @@ export async function addPdfFileDetails(
     throw new Error("Failed to create document: Unknown error");
   }
 }
-export async function getDocumentById(id: string): Promise<Document | null> {
+export async function getDocumentById(
+  id: string
+): Promise<DocumentWithMessages | null> {
   const user = await currentUser();
   if (!user) {
     console.warn("No user found, returning null");
@@ -140,43 +131,27 @@ export async function getDocumentById(id: string): Promise<Document | null> {
   }
 
   try {
-    const resource = await prismadb.document.findUnique({
+    const document = await prismadb.document.findUnique({
       where: { id, userId: user.id },
-      select: {
-        id: true,
-        userId: true,
-        userName: true,
-        fileKey: true,
-        fileName: true,
-        fileSize: true,
-        fileUrl: true,
-        createdAt: true,
+      include: {
+        messages: {
+          orderBy: { createdAt: "asc" },
+        },
       },
     });
 
-    if (!resource) {
+    if (!document) {
       console.warn(`Document with ID ${id} not found`);
       return null;
     }
 
-    const fileSize = formatFileSize(resource.fileSize ?? 0);
-    const createdAt = formatCreatedDate(new Date(resource.createdAt));
-
-    return {
-      id: resource.id,
-      userName: resource.userName ?? "Unknown User",
-      userId: resource.userId ?? "",
-      fileKey: resource.fileKey ?? "",
-      fileName: resource.fileName ?? "Untitled Document",
-      fileSize,
-      fileUrl: resource.fileUrl ?? "",
-      createdAt,
-    };
+    return document;
   } catch (error) {
     console.error("Error fetching document by ID:", error);
     return null;
   }
 }
+
 export async function deleteDocumentById(id: string): Promise<DeleteResult> {
   try {
     await prismadb.document.delete({

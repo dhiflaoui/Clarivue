@@ -114,9 +114,10 @@ const UploadPDF: React.FC<{ onUploadSuccess?: () => void }> = ({
         success: false,
         message: error instanceof Error ? error.message : "Upload failed",
       };
-    } finally {
-      setIsUploading(false);
     }
+    //  finally {
+    //   setIsUploading(false);
+    // }
   };
 
   const uploadUrlToCloudinary = async (urlToUpload: string) => {
@@ -218,6 +219,8 @@ const UploadPDF: React.FC<{ onUploadSuccess?: () => void }> = ({
             embedError instanceof Error ? embedError.message : "Unknown error"
           }`,
         });
+      } finally {
+        setIsUploading(false);
       }
     }
   };

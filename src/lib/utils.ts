@@ -20,10 +20,20 @@ export function formatFileSize(bytes: number): string {
     ? `${(fileSizeKB / 1024).toFixed(1)} MB`
     : `${fileSizeKB} KB`;
 }
-export function formatCreatedDate(createdDate: Date): string {
+
+export function formatCreatedDate(createdDate: Date | string): string {
+  console.log("createdDate: ", createdDate);
+
+  const date =
+    typeof createdDate === "string" ? new Date(createdDate) : createdDate;
+
+  if (isNaN(date.getTime())) {
+    return "Invalid date";
+  }
+
   const now = new Date();
   const diffDays = Math.floor(
-    (now.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24)
+    (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
   );
 
   if (diffDays === 0) return "today";
@@ -31,9 +41,8 @@ export function formatCreatedDate(createdDate: Date): string {
   if (diffDays < 7) return `${diffDays} days ago`;
   if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
 
-  return createdDate.toLocaleDateString();
+  return date.toLocaleDateString();
 }
-
 export function scrollToBottom(
   messageEndRef: React.RefObject<HTMLDivElement | null>
 ) {

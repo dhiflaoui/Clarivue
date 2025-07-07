@@ -1,9 +1,9 @@
 "use client";
 
 import UploadPDF from "@/components/sections/documents/UploadPDF";
-import { File, Trash2, Loader2, MessagesSquare } from "lucide-react";
+import { File, Trash2, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Document } from "@/actions/db";
+import { Document } from "../../../../prisma/prisma-client";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import UpdatePDF from "@/components/sections/documents/UpdatePDF";
 import Link from "next/link";
+import { formatCreatedDate, formatFileSize } from "@/lib/utils";
 
 const Documents = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -63,7 +64,7 @@ const Documents = () => {
 
     try {
       setDeletingId(documentToDelete.id);
-      const filename = documentToDelete.fileKey.split("/").pop();
+      const filename = documentToDelete.fileKey!.split("/").pop();
       const documentId = documentToDelete.id;
       if (!filename) {
         throw new Error("Invalid fileKey structure.");
@@ -89,7 +90,7 @@ const Documents = () => {
         throw new Error(`Delete failed: ${errorMessage}`);
       }
 
-      await fetchDocuments(); // Refresh documents list after deletion
+      await fetchDocuments();
     } catch (err) {
       console.error("Error deleting document:", err);
       setError("Failed to delete document. Please try again.");
@@ -166,15 +167,15 @@ const Documents = () => {
                 </Link>
               </td>
               <td className="p-4 text-right text-sm text-gray-500 whitespace-nowrap w-20">
-                {document.fileSize}
+                {formatFileSize(document.fileSize!)}
               </td>
               <td className="p-4 text-right text-sm text-gray-500 whitespace-nowrap w-28">
-                {document.createdAt}
+                {formatCreatedDate(document.createdAt)}
               </td>
               <td className="p-4 text-right w-4">
                 <UpdatePDF
                   onUpdateSuccess={handleUpdateSuccess}
-                  docCurrentName={document.fileName}
+                  docCurrentName={document.fileName!}
                   documentId={document.id}
                 />
               </td>
@@ -212,15 +213,16 @@ const Documents = () => {
           <input
             type="text"
             placeholder="Search documents..."
-            className="border rounded px-3 py-2 w-[80%] bg-white"
+            className="border rounded px-3 py-2 w-[90%] bg-white"
           />
-          <div className="flex items-end gap-2">
+          <UploadPDF onUploadSuccess={handleUploadSuccess} />
+          {/* <div className="flex items-end gap-2">
             <UploadPDF onUploadSuccess={handleUploadSuccess} />
             <Button variant="outline" className="bg-[#062427] text-white">
               <MessagesSquare />
               All Chat
             </Button>
-          </div>
+          </div> */}
         </div>
 
         <div className="bg-white rounded shadow w-full overflow-x-auto mt-4">

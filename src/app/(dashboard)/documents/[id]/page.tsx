@@ -12,6 +12,7 @@ interface Props {
 const ChatPage = async ({ params }: Props) => {
   const { id } = await params;
   const document = await getDocumentById(id);
+  console.log("document: ", document);
 
   if (!document) {
     redirect("/documents");
@@ -19,7 +20,7 @@ const ChatPage = async ({ params }: Props) => {
 
   return (
     <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
-      <PdfViewer fileUrl={document.fileUrl} />
+      <PdfViewer fileUrl={document.fileUrl!} />
       <Chat document={document} />
     </div>
   );

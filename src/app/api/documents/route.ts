@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { getAllDocuments, Document, updateDocumentName } from "@/actions/db";
+import { getAllDocuments, updateDocumentName } from "@/actions/db";
+import { Document } from "../../../../prisma/prisma-client";
 import { auth } from "@clerk/nextjs/server";
 
 interface ErrorResponse {
