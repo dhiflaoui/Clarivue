@@ -21,6 +21,7 @@ import { formatCreatedDate, formatFileSize } from "@/lib/utils";
 
 const Documents = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
+  const [filteredDocuments, setFilteredDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -53,7 +54,9 @@ const Documents = () => {
   useEffect(() => {
     fetchDocuments();
   }, []);
-
+  useEffect(() => {
+    setFilteredDocuments(documents);
+  }, [documents]);
   const handleDeleteClick = (document: Document) => {
     setDocumentToDelete(document);
     setIsDeleteDialogOpen(true);
@@ -100,6 +103,17 @@ const Documents = () => {
       setDocumentToDelete(null);
     }
   };
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const searchTerm = e.target.value;
+    const filtered = filterDocuments(documents, searchTerm);
+    setFilteredDocuments(filtered);
+  };
+  const filterDocuments = (documents: Document[], searchTerm: string) => {
+    return documents.filter(
+      (doc) =>
+        doc.fileName?.toLowerCase().includes(searchTerm.toLowerCase()) || false
+    );
+  };
 
   const handleUploadSuccess = () => {
     fetchDocuments();
@@ -121,7 +135,7 @@ const Documents = () => {
       return <div className="p-4 text-center text-red-500">{error}</div>;
     }
 
-    if (documents.length === 0) {
+    if (filteredDocuments.length === 0) {
       return (
         <div className="p-8 text-center text-gray-500">
           No documents found. Upload your first document using the Upload
@@ -147,7 +161,7 @@ const Documents = () => {
           </tr>
         </thead>
         <tbody>
-          {documents.map((document) => (
+          {filteredDocuments.map((document) => (
             <tr
               key={document.id}
               className="border-b border-gray-200 hover:bg-gray-50"
@@ -214,6 +228,7 @@ const Documents = () => {
             type="text"
             placeholder="Search documents..."
             className="border rounded px-3 py-2 w-[90%] bg-white"
+            onChange={handleSearchChange}
           />
           <UploadPDF onUploadSuccess={handleUploadSuccess} />
           {/* <div className="flex items-end gap-2">
