@@ -8,7 +8,7 @@ import { indexName } from "@/lib/pinecone";
 import pinecone from "@/lib/pinecone";
 import { PineconeStore } from "langchain/vectorstores/pinecone";
 import embeddings from "@/lib/HuggingFace";
-//TODO reafcator this page
+
 export const embedPDFToPinecone = async (
   filePublicId: string,
   pdfFileUrl: string
@@ -19,8 +19,6 @@ export const embedPDFToPinecone = async (
     if (!userId) {
       throw new Error("Unauthorized");
     }
-    //TODO : delete this code
-    // let pdfFileData = await fetchFileByPublicId(filePublicId);
 
     const pdfFile = await fetch(pdfFileUrl, {
       method: "GET",
@@ -40,8 +38,6 @@ export const embedPDFToPinecone = async (
       throw new Error("PDF file is empty");
     }
 
-    console.log("PDF downloaded, size:", arrayBuffer.byteLength, "bytes");
-
     // Convert ArrayBuffer to File
     const file = new File([arrayBuffer], `${filePublicId}.pdf`, {
       type: "application/pdf",
@@ -49,7 +45,6 @@ export const embedPDFToPinecone = async (
 
     const loader = new PDFLoader(file);
     const documents = await loader.load();
-    console.log("Documents loaded:", documents);
 
     // Trim useless metadata for each document
     const trimDocs = documents.map((doc) => {
@@ -81,10 +76,6 @@ export const embedPDFToPinecone = async (
     } catch (error) {
       console.error("❌ Error in embedPDFToPinecone:", error);
     }
-
-    //TODO: fix this data
-    // const data = JSON.parse(JSON.stringify(splitDocs));
-    // return documents.length > 0 ? data : [];
   } catch (error) {
     console.error("❌ Error in embedPDFToPinecone:", error);
 

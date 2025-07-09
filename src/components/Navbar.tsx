@@ -12,8 +12,14 @@ const Navbar: React.FC = () => {
       <div className="mx-auto max-w-7xl h-[60px] px-8 md:px-6">
         <div className="flex items-center justify-between h-full">
           <div className="flex">
-            <BookOpenCheck className="text-black w-7 h-7 mr-3" />
-            <span className="text-lg font-medium text-black">Clarivue</span>
+            <div className="flex items-center transition-all duration-200 group-hover:scale-105">
+              <div className="p-2 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl mr-3 shadow-lg group-hover:shadow-xl transition-all duration-200">
+                <BookOpenCheck className="text-white w-5 h-5" />
+              </div>
+              <span className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+                Clarivue
+              </span>
+            </div>
           </div>
           <Link href={isSignedIn ? "/documents" : "/sign-in"}>
             {/* <Link href="/documents"> */}

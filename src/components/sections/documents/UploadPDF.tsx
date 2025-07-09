@@ -115,9 +115,6 @@ const UploadPDF: React.FC<{ onUploadSuccess?: () => void }> = ({
         message: error instanceof Error ? error.message : "Upload failed",
       };
     }
-    //  finally {
-    //   setIsUploading(false);
-    // }
   };
 
   const uploadUrlToCloudinary = async (urlToUpload: string) => {
@@ -154,8 +151,6 @@ const UploadPDF: React.FC<{ onUploadSuccess?: () => void }> = ({
         success: false,
         message: error instanceof Error ? error.message : "URL upload failed",
       };
-    } finally {
-      setIsUploading(false);
     }
   };
 
@@ -232,7 +227,14 @@ const UploadPDF: React.FC<{ onUploadSuccess?: () => void }> = ({
           <UploadCloud className="w-4 h-4 ml-2" style={{ strokeWidth: 3 }} />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent
+        className="sm:max-w-[425px]"
+        onInteractOutside={(e) => {
+          if (isUploading) {
+            e.preventDefault();
+          }
+        }}
+      >
         <DialogHeader>
           <DialogTitle>Upload a document</DialogTitle>
         </DialogHeader>

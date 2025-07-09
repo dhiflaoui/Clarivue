@@ -22,8 +22,6 @@ export function formatFileSize(bytes: number): string {
 }
 
 export function formatCreatedDate(createdDate: Date | string): string {
-  console.log("createdDate: ", createdDate);
-
   const date =
     typeof createdDate === "string" ? new Date(createdDate) : createdDate;
 

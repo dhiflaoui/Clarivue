@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import cloudinary from "@/lib/cloudinary";
+import { addPdfFileDetails } from "@/actions/db";
 
 interface UploadResponse {
   url: string;
@@ -37,10 +38,16 @@ export async function POST(
     const { filenameWithoutExt } = extractFilenameInfo(url);
     const filename = `${filenameWithoutExt}.pdf`;
     const result = await uploadToCloudinary(url, filename);
-
+    const document = await addPdfFileDetails({
+      fileName: filename,
+      fileSize: result.bytes ?? 0,
+      fileKey: result.public_id,
+      fileUrl: result.secure_url,
+    });
     return NextResponse.json({
       url: result.secure_url,
       public_id: result.public_id,
+      docId: document.id,
     });
   } catch (error) {
     console.error("URL upload error:", error);

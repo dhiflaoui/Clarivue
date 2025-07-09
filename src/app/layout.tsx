@@ -27,7 +27,10 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <body className={`${poppins.className}`}>
+        <body
+          className={`${poppins.className}`}
+          suppressHydrationWarning={true}
+        >
           <div className="bg-[#faf9f6]">{children}</div>
           <ToastContainer />
         </body>

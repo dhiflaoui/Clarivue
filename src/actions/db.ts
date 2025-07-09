@@ -151,7 +151,6 @@ export async function getDocumentById(
     return null;
   }
 }
-
 export async function deleteDocumentById(id: string): Promise<DeleteResult> {
   try {
     await prismadb.document.delete({

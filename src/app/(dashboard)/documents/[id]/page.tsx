@@ -12,7 +12,6 @@ interface Props {
 const ChatPage = async ({ params }: Props) => {
   const { id } = await params;
   const document = await getDocumentById(id);
-  console.log("document: ", document);
 
   if (!document) {
     redirect("/documents");
