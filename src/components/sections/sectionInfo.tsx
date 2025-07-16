@@ -51,15 +51,35 @@ const SectionInfo: React.FC = () => {
           </div>
         </div>
 
-        <div className="md:w-1/2">
-          <Image src="/images/hero.svg" alt="Hero" width={1000} height={1000} />
-          {/* TODO: Add the image here */}
-          {/* <Image
+        {/* <div className="md:w-1/3"> */}
+        {/* <Image src="/images/hero.svg" alt="Hero" width={1000} height={1000} /> */}
+        {/* <Image
+            src="/images/Hero2.png"
+            alt="Hero"
+            width={2000}
+            height={2000}
+          /> */}
+        {/* TODO: Add the image here */}
+        {/* <Image
             src="/images/frontImage.png"
             alt="Hero"
             width={1000}
             height={1000}
           /> */}
+        {/* </div> */}
+        <div className="lg:w-3/5 xl:w-2/3 flex">
+          <div className="relative w-full max-w-4xl">
+            <Image
+              src="/images/Hero2.png"
+              alt="Hero illustration showing PDF document interaction"
+              width={2400}
+              height={2400}
+              className="w-full h-auto object-contain drop-shadow-2xl"
+              priority
+              quality={95}
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 60vw, 66vw"
+            />
+          </div>
         </div>
       </div>
     </section>

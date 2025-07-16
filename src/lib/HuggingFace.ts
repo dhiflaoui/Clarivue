@@ -1,4 +1,5 @@
-import { HuggingFaceInferenceEmbeddings } from "langchain/embeddings/hf";
+// import { HuggingFaceInferenceEmbeddings } from "langchain/embeddings/hf";
+import { HuggingFaceInferenceEmbeddings } from "@langchain/community/embeddings/hf";
 
 const embeddings = new HuggingFaceInferenceEmbeddings({
   apiKey: process.env.HUGGINGFACE_API_KEY,

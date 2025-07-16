@@ -61,7 +61,7 @@ export async function getAllDocuments(userId: string): Promise<Document[]> {
     });
   } catch (error) {
     console.error("Error fetching documents from database:", error);
-    return [];
+    throw new Error("Failed to fetch documents from database");
   }
 }
 export async function addPdfFileDetails(
@@ -195,5 +195,36 @@ export async function updateDocumentName(
   } catch (error) {
     console.error("Error updating document name:", error);
     return null;
+  }
+}
+interface RequestData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  company: string;
+  role: string;
+  message: string;
+  invitationId: string;
+  createdAt: Date;
+}
+
+export async function saveRequestToDatabase(
+  requestData: RequestData
+): Promise<void> {
+  try {
+    await prismadb.request.create({
+      data: {
+        firstName: requestData.firstName,
+        lastName: requestData.lastName,
+        email: requestData.email,
+        company: requestData.company,
+        role: requestData.role,
+        message: requestData.message,
+        invitationId: requestData.invitationId,
+        createdAt: requestData.createdAt,
+      },
+    });
+  } catch (error) {
+    console.error("Error saving request to database:", error);
   }
 }

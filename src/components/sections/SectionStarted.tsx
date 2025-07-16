@@ -1,5 +1,6 @@
 import React from "react";
 import { Button } from "../ui/button";
+import Link from "next/link";
 
 const SectionStarted: React.FC = () => {
   return (
@@ -12,7 +13,9 @@ const SectionStarted: React.FC = () => {
         No credit card required.
       </p>
       <div className="w-full max-w-sm mx-auto px-4">
-        <Button variant={"orange"}>Sign Up for Free</Button>
+        <Link href="/request-demo">
+          <Button variant={"orange"}>Request a demo</Button>
+        </Link>
       </div>
     </section>
   );

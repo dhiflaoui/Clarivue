@@ -1,12 +1,14 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { PDFLoader } from "langchain/document_loaders/fs/pdf";
+// import { PDFLoader } from "langchain/document_loaders/fs/pdf";
+// import { PineconeStore } from "langchain/vectorstores/pinecone";
+import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { Document } from "langchain/document";
 import { CharacterTextSplitter } from "langchain/text_splitter";
 import { indexName } from "@/lib/pinecone";
 import pinecone from "@/lib/pinecone";
-import { PineconeStore } from "langchain/vectorstores/pinecone";
+import { PineconeStore } from "@langchain/pinecone";
 import embeddings from "@/lib/HuggingFace";
 
 export const embedPDFToPinecone = async (

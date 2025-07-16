@@ -36,6 +36,7 @@ const Documents = () => {
       setError(null);
 
       const response = await fetch("/api/documents");
+      console.log("response: ", response);
 
       if (!response.ok) {
         throw new Error("Failed to fetch documents");

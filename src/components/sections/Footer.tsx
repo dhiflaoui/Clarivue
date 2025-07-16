@@ -47,9 +47,9 @@ const Footer: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 sm:gap-x-20">
-            {footerColumns.map((column, index) => (
+            {footerColumns.map((column) => (
               <FooterColumn
-                key={index}
+                key={column.title}
                 title={column.title}
                 links={column.links}
               />

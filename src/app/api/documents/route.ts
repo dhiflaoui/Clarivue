@@ -11,6 +11,7 @@ export async function GET(): Promise<NextResponse<Document[] | ErrorResponse>> {
   const { userId } = await auth();
   try {
     const documents = await getAllDocuments(userId ?? "");
+
     return NextResponse.json(documents);
   } catch (error) {
     const errorMessage =
