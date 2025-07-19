@@ -96,14 +96,16 @@ export async function POST(request: NextRequest) {
       id: msg.id,
       role: msg.role,
       content: msg.content,
+      tool_calls: undefined,
     }));
 
     // 3. Combine system prompt with the message history
-    const chatRequestMessages: Message[] = [
+    const chatRequestMessages = [
       {
         id: "system-" + Date.now(),
         role: "system",
         content: systemPrompt,
+        tool_calls: undefined,
       },
       ...formattedMessages,
     ];

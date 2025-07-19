@@ -10,7 +10,7 @@ const FooterLink: React.FC<FooterLinkProps> = ({
   children,
 }: FooterLinkProps) => {
   return (
-    <a href={href} className="hover:underline text-sm text-gray-400">
+    <a href={href} className="hover:underline text-sm text-gray-500 dark:text-gray-400">
       {children}
     </a>
   );

@@ -24,13 +24,13 @@ const SectionFeatures: React.FC = () => {
   ];
   return (
     <section className="section-container">
-      <h1 className="text-center text-4xl font-semibold mb-5 sm:mb-10">
+      <h1 className="text-center text-4xl font-semibold mb-5 sm:mb-10 text-gray-800 dark:text-gray-200">
         How it works
       </h1>
-      <div className="text-black grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:gap-10">
-        {features.map((feature, index) => (
+      <div className="text-black dark:text-white grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:gap-10">
+        {features.map((feature) => (
           <FeatureCard
-            key={index}
+            key={feature.title}
             image={feature.image}
             title={feature.title}
             description={feature.description}

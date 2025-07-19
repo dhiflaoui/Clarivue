@@ -2,7 +2,6 @@ import Chat from "@/components/chat/Chat";
 import PdfViewer from "@/components/chat/PdfViewer";
 import { getDocumentById } from "@/actions/db";
 import { redirect } from "next/navigation";
-i;
 
 interface Props {
   params: Promise<{
