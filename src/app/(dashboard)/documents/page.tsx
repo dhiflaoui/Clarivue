@@ -145,15 +145,15 @@ const Documents = () => {
     }
     return (
       <table className="min-w-full">
-        <thead className="bg-gray-50 border-b border-gray-200">
+        <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
           <tr>
-            <th className="p-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="p-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
               Name
             </th>
-            <th className="p-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="p-4 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
               Size
             </th>
-            <th className="p-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="p-4 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
               Date
             </th>
             <th className="p-4 text-right"></th>
@@ -164,7 +164,7 @@ const Documents = () => {
           {filteredDocuments.map((document) => (
             <tr
               key={document.id}
-              className="border-b border-gray-200 hover:bg-gray-50"
+              className="border-b border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
             >
               <td className="p-4 text-left flex items-center">
                 <File
@@ -175,15 +175,15 @@ const Documents = () => {
                   className="hover:underline"
                   href={`/documents/${document.id}`}
                 >
-                  <span className="text-ellipsis overflow-hidden whitespace-normal max-w-[300px] text-sm font-medium">
+                  <span className="text-ellipsis overflow-hidden whitespace-normal max-w-[300px] text-sm font-medium text-gray-800 dark:text-gray-200">
                     {document.fileName}
                   </span>
                 </Link>
               </td>
-              <td className="p-4 text-right text-sm text-gray-500 whitespace-nowrap w-20">
+              <td className="p-4 text-right text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap w-20">
                 {formatFileSize(document.fileSize!)}
               </td>
-              <td className="p-4 text-right text-sm text-gray-500 whitespace-nowrap w-28">
+              <td className="p-4 text-right text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap w-28">
                 {formatCreatedDate(document.createdAt)}
               </td>
               <td className="p-4 text-right w-4">
@@ -218,16 +218,16 @@ const Documents = () => {
     );
   };
   return (
-    <section className="bg-[#faf9f6] min-h-screen">
+    <section className="bg-[#faf9f6] dark:bg-[#111111] min-h-screen">
       <div className="section-container">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl">Documents</h1>
+          <h1 className="text-2xl text-gray-800 dark:text-gray-200">Documents</h1>
         </div>
         <div className="flex gap-4">
           <input
             type="text"
             placeholder="Search documents..."
-            className="border rounded px-3 py-2 w-[90%] bg-white"
+            className="border rounded px-3 py-2 w-[90%] bg-white dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700"
             onChange={handleSearchChange}
           />
           <UploadPDF onUploadSuccess={handleUploadSuccess} />
@@ -240,7 +240,7 @@ const Documents = () => {
           </div> */}
         </div>
 
-        <div className="bg-white rounded shadow w-full overflow-x-auto mt-4">
+        <div className="bg-white dark:bg-gray-800 rounded shadow w-full overflow-x-auto mt-4">
           {renderContent()}
         </div>
       </div>
@@ -249,10 +249,10 @@ const Documents = () => {
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-white dark:bg-gray-800">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Document</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-gray-800 dark:text-gray-200">Delete Document</AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-600 dark:text-gray-400">
               Are you sure you want to delete {documentToDelete?.fileName}? This
               action cannot be undone.
             </AlertDialogDescription>

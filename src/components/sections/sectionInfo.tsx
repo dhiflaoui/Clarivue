@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Button } from "../ui/button";
 import Typewriter from "typewriter-effect";
 import UserAvatars from "./UserAvatars";
+import Link from "next/link";
 const SectionInfo: React.FC = () => {
   const USERS = [
     { id: 1, src: "/images/user_1.jpeg", alt: "User 1" },
@@ -45,21 +46,23 @@ const SectionInfo: React.FC = () => {
 
           <div>
             <div className="flex justify-center md:justify-start">
-              <Button variant={"orange"}>Get Started for free</Button>
+              <Link href="#">
+                <Button variant={"orange"}>Get Started for free</Button>
+              </Link>
             </div>
             <UserAvatars USERS={USERS} />
           </div>
         </div>
 
         <div className="md:w-1/2">
-          <Image src="/images/hero.svg" alt="Hero" width={1000} height={1000} />
+          {/* <Image src="/images/hero.svg" alt="Hero" width={1000} height={1000} /> */}
           {/* TODO: Add the image here */}
-          {/* <Image
-            src="/images/frontImage.png"
+          <Image
+            src="/images/heroo.png"
             alt="Hero"
             width={1000}
             height={1000}
-          /> */}
+          />
         </div>
       </div>
     </section>

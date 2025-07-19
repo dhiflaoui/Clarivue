@@ -70,15 +70,15 @@ const Chat = ({ document, type }: Props) => {
           <Button
             variant="ghost"
             size="sm"
-            className="relative p-2 h-9 w-9 font-medium transition-all duration-200 bg-transparent border-0 hover:scale-105 outline-none hover:bg-[#ff612f] hover:text-white hover:shadow-xl rounded-full"
+            className="relative p-2 h-9 w-9 font-medium transition-all duration-200 bg-transparent border-0 hover:scale-105 outline-none hover:bg-[#ff612f] hover:text-white dark:hover:bg-orange-500/20 dark:hover:text-orange-500 hover:shadow-xl rounded-full"
           >
             <Sparkles className="w-4 h-4" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-80">
+        <PopoverContent className="w-80 bg-white dark:bg-gray-800">
           <div className="grid gap-4">
             <div className="space-y-2">
-              <h4 className="leading-none font-medium">
+              <h4 className="leading-none font-medium text-gray-800 dark:text-gray-200">
                 Don&#39;t know what to ask? Try these ↓
               </h4>
             </div>
@@ -87,7 +87,7 @@ const Chat = ({ document, type }: Props) => {
                 <button
                   key={question}
                   type="button"
-                  className="w-full text-left px-2 py-1 rounded hover:bg-[#ff612f]/10 transition-colors text-muted-foreground text-sm"
+                  className="w-full text-left px-2 py-1 rounded hover:bg-[#ff612f]/10 dark:hover:bg-orange-500/20 transition-colors text-muted-foreground dark:text-gray-400 text-sm"
                   onClick={askQuestion(question)}
                 >
                   {question}
@@ -101,7 +101,7 @@ const Chat = ({ document, type }: Props) => {
   };
   return (
     <div
-      className="w-1/2 mt-15 overflow-scroll bg-white"
+      className="w-1/2 mt-15 overflow-scroll bg-white dark:bg-gray-800"
       style={{
         height: "calc(100vh - 3.75rem)",
         display: "flex",
@@ -110,7 +110,7 @@ const Chat = ({ document, type }: Props) => {
     >
       <div className="h-full flex flex-col justify-between">
         {/* Messages */}
-        <div className="overflow-auto bg-white">
+        <div className="overflow-auto bg-white dark:bg-gray-800">
           <div className="flex flex-col">
             {messages.length > 0 ? (
               messages.map((message) => (
@@ -118,7 +118,9 @@ const Chat = ({ document, type }: Props) => {
                   key={message.id}
                   className={cn(
                     "p-6 w-full flex items-start gap-x-8",
-                    message.role === "user" ? "bg-white" : "bg-[#faf9f6]"
+                    message.role === "user"
+                      ? "bg-white dark:bg-gray-800"
+                      : "bg-[#faf9f6] dark:bg-gray-900"
                   )}
                 >
                   <div className="w-4">
@@ -128,7 +130,7 @@ const Chat = ({ document, type }: Props) => {
                       <Bot className="bg-[#062427] text-white rounded-sm p-1" />
                     )}
                   </div>
-                  <div className="text-sm font-light overflow-hidden leading-7">
+                  <div className="text-sm font-light overflow-hidden leading-7 text-gray-800 dark:text-gray-200">
                     {message.content}
                   </div>
                 </div>
@@ -136,18 +138,18 @@ const Chat = ({ document, type }: Props) => {
             ) : (
               <div className="p-6 w-full flex items-center justify-center mt-50">
                 <div className="space-y-2 text-center">
-                  <MessageSquareTextIcon className="w-5 h-5 mx-auto" />
-                  <p className="text-sm text-gray-700">
+                  <MessageSquareTextIcon className="w-5 h-5 mx-auto text-gray-500 dark:text-gray-400" />
+                  <p className="text-sm text-gray-700 dark:text-gray-300">
                     Chat messages will appear in this area.
                   </p>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
                     To begin, ask a question related to your document.
                   </p>
                 </div>
               </div>
             )}
             {isLoading && (
-              <div className="p-6 w-full flex items-start gap-x-8 bg-[#faf9f6]">
+              <div className="p-6 w-full flex items-start gap-x-8 bg-[#faf9f6] dark:bg-gray-900">
                 <div className="w-4">
                   <Bot className="bg-[#062427] text-white rounded-sm p-1" />
                 </div>
@@ -170,17 +172,17 @@ const Chat = ({ document, type }: Props) => {
           <div ref={messageRef}></div>
         </div>
         {/* Form */}
-        <div className="bg-[#faf9f6]">
+        <div className="bg-[#faf9f6] dark:bg-gray-900">
           <form onSubmit={handleSubmit} className="flex items-end gap-2 p-4">
             <div className="mb-3">{type === "custom" && <PopOverBtn />}</div>
-            <div className="flex flex-1 items-center rounded-md border border-[#e5e3da] bg-white px-3 py-2 shadow-sm">
+            <div className="flex flex-1 items-center rounded-md border border-[#e5e3da] dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 shadow-sm">
               <Input
                 type="text"
                 placeholder="Ask a question"
                 value={input}
                 onChange={handleInputChange}
                 disabled={isLoading || type === "custom"}
-                className="flex-1 border-none outline-none focus-visible:ring-0 focus-visible:ring-transparent disabled:opacity-50 bg-transparent"
+                className="flex-1 border-none outline-none focus-visible:ring-0 focus-visible:ring-transparent disabled:opacity-50 bg-transparent dark:text-gray-200"
                 autoComplete="off"
                 spellCheck={false}
               />

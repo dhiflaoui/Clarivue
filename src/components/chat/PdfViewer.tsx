@@ -11,10 +11,13 @@ import {
 import "@react-pdf-viewer/core/lib/styles/index.css";
 import "@react-pdf-viewer/default-layout/lib/styles/index.css";
 import { ReactElement } from "react";
+import { useTheme } from "next-themes";
+
 interface PdfViewerProps {
   fileUrl: string;
 }
 const PdfViewer = ({ fileUrl }: PdfViewerProps) => {
+  const { theme } = useTheme();
   const renderToolbar = (Toolbar: (props: ToolbarProps) => ReactElement) => (
     <Toolbar>
       {(slots: ToolbarSlot) => {
@@ -91,7 +94,11 @@ const PdfViewer = ({ fileUrl }: PdfViewerProps) => {
       }}
     >
       <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js">
-        <Viewer plugins={[defaultLayoutPluginInstance]} fileUrl={fileUrl} />
+        <Viewer
+          plugins={[defaultLayoutPluginInstance]}
+          fileUrl={fileUrl}
+          theme={theme === "dark" ? "dark" : "light"}
+        />
       </Worker>
     </div>
   );
