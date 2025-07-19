@@ -55,14 +55,14 @@ const SectionInfo: React.FC = () => {
         </div>
 
         <div className="md:w-1/2">
-          <Image src="/images/hero.svg" alt="Hero" width={1000} height={1000} />
+          {/* <Image src="/images/hero.svg" alt="Hero" width={1000} height={1000} /> */}
           {/* TODO: Add the image here */}
-          {/* <Image
-            src="/images/frontImage.png"
+          <Image
+            src="/images/heroo.png"
             alt="Hero"
             width={1000}
             height={1000}
-          /> */}
+          />
         </div>
       </div>
     </section>
