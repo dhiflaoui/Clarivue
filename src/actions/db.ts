@@ -61,7 +61,9 @@ export async function getAllDocuments(userId: string): Promise<Document[]> {
     });
   } catch (error) {
     console.error("Error fetching documents from database:", error);
-    return [];
+    throw new Error(
+      "Failed to fetch documents from database. Please try again later."
+    );
   }
 }
 export async function addPdfFileDetails(

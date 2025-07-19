@@ -1,30 +1,104 @@
 "use client";
-import React, { useEffect, useRef } from "react";
-import { Bot, Loader2, Send, User } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Bot,
+  Loader2,
+  MessageSquareTextIcon,
+  Send,
+  Sparkles,
+  User,
+} from "lucide-react";
 import { Button } from "../ui/button";
 import { cn, scrollToBottom } from "@/lib/utils";
 import { useChat } from "ai/react";
 import { Document, Message as MessageDB } from "../../../prisma/prisma-client";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Input } from "../ui/input";
 interface Props {
   document: Document & {
     messages: MessageDB[];
   };
+  type: "custom" | "default";
 }
 
-const Chat = ({ document }: Props) => {
-  const { messages, input, handleInputChange, handleSubmit, isLoading } =
-    useChat({
-      api: "/api/chat",
-      body: {
-        fileKey: document.fileKey,
-        documentId: document.id,
-      },
-      initialMessages: document.messages,
-    });
+const Chat = ({ document, type }: Props) => {
+  const listQuestions = [
+    "What is GPT-4?",
+    "What kind of inputs can GPT-4 understand?",
+    "How did GPT-4 perform on the bar exam?",
+    "What are some limitations of GPT-4?",
+  ];
+  const {
+    messages,
+    input,
+    handleInputChange,
+    handleSubmit,
+    isLoading,
+    append,
+  } = useChat({
+    api: "/api/chat",
+    body: {
+      fileKey: document.fileKey,
+      documentId: document.id,
+      type: type,
+    },
+    initialMessages: document.messages,
+  });
   const messageRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     scrollToBottom(messageRef);
   }, [messages]);
+  const PopOverBtn = () => {
+    const [open, setOpen] = useState(false);
+
+    const askQuestion = (question: string) => () => {
+      console.log("Question asked:", question);
+      append({
+        role: "user",
+        content: question,
+      });
+      setOpen(false);
+    };
+
+    return (
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="relative p-2 h-9 w-9 font-medium transition-all duration-200 bg-transparent border-0 hover:scale-105 outline-none hover:bg-[#ff612f] hover:text-white hover:shadow-xl rounded-full"
+          >
+            <Sparkles className="w-4 h-4" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-80">
+          <div className="grid gap-4">
+            <div className="space-y-2">
+              <h4 className="leading-none font-medium">
+                Don&#39;t know what to ask? Try these ↓
+              </h4>
+            </div>
+            <div className="grid gap-2">
+              {listQuestions.map((question) => (
+                <button
+                  key={question}
+                  type="button"
+                  className="w-full text-left px-2 py-1 rounded hover:bg-[#ff612f]/10 transition-colors text-muted-foreground text-sm"
+                  onClick={askQuestion(question)}
+                >
+                  {question}
+                </button>
+              ))}
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
+    );
+  };
   return (
     <div
       className="w-1/2 mt-15 overflow-scroll bg-white"
@@ -38,26 +112,40 @@ const Chat = ({ document }: Props) => {
         {/* Messages */}
         <div className="overflow-auto bg-white">
           <div className="flex flex-col">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={cn(
-                  "p-6 w-full flex items-start gap-x-8",
-                  message.role === "user" ? "bg-white" : "bg-[#faf9f6]"
-                )}
-              >
-                <div className="w-4">
-                  {message.role === "user" ? (
-                    <User className="bg-[#ff612f] text-white rounded-sm p-1" />
-                  ) : (
-                    <Bot className="bg-[#062427] text-white rounded-sm p-1" />
+            {messages.length > 0 ? (
+              messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={cn(
+                    "p-6 w-full flex items-start gap-x-8",
+                    message.role === "user" ? "bg-white" : "bg-[#faf9f6]"
                   )}
+                >
+                  <div className="w-4">
+                    {message.role === "user" ? (
+                      <User className="bg-[#ff612f] text-white rounded-sm p-1" />
+                    ) : (
+                      <Bot className="bg-[#062427] text-white rounded-sm p-1" />
+                    )}
+                  </div>
+                  <div className="text-sm font-light overflow-hidden leading-7">
+                    {message.content}
+                  </div>
                 </div>
-                <div className="text-sm font-light overflow-hidden leading-7">
-                  {message.content}
+              ))
+            ) : (
+              <div className="p-6 w-full flex items-center justify-center mt-50">
+                <div className="space-y-2 text-center">
+                  <MessageSquareTextIcon className="w-5 h-5 mx-auto" />
+                  <p className="text-sm text-gray-700">
+                    Chat messages will appear in this area.
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    To begin, ask a question related to your document.
+                  </p>
                 </div>
               </div>
-            ))}
+            )}
             {isLoading && (
               <div className="p-6 w-full flex items-start gap-x-8 bg-[#faf9f6]">
                 <div className="w-4">
@@ -83,28 +171,37 @@ const Chat = ({ document }: Props) => {
         </div>
         {/* Form */}
         <div className="bg-[#faf9f6]">
-          <form
-            onSubmit={handleSubmit}
-            className="m-4 p-2 item-center justify-between rounded-md border-[#e5e3da] border bg-white flex"
-          >
-            <input
-              type="text"
-              placeholder="Ask a question"
-              value={input}
-              onChange={handleInputChange}
-              disabled={isLoading}
-              className="flex-1 border-none outline-none focus-visible:ring-0 focus-visible:ring-transparent disabled:opacity-50"
-            />
-            {isLoading ? (
-              <Loader2
-                className="h-5 w-5 text-[#ff612f]/70 animate-spin"
-                style={{ strokeWidth: "3" }}
+          <form onSubmit={handleSubmit} className="flex items-end gap-2 p-4">
+            <div className="mb-3">{type === "custom" && <PopOverBtn />}</div>
+            <div className="flex flex-1 items-center rounded-md border border-[#e5e3da] bg-white px-3 py-2 shadow-sm">
+              <Input
+                type="text"
+                placeholder="Ask a question"
+                value={input}
+                onChange={handleInputChange}
+                disabled={isLoading || type === "custom"}
+                className="flex-1 border-none outline-none focus-visible:ring-0 focus-visible:ring-transparent disabled:opacity-50 bg-transparent"
+                autoComplete="off"
+                spellCheck={false}
               />
-            ) : (
-              <Button variant="orange" type="submit">
-                <Send className="w-4 h-4" />
-              </Button>
-            )}
+              {isLoading ? (
+                <Loader2
+                  className="h-5 w-5 text-[#ff612f]/70 animate-spin ml-2"
+                  style={{ strokeWidth: 3 }}
+                />
+              ) : (
+                <Button
+                  variant="orange"
+                  type="submit"
+                  size="icon"
+                  className="ml-2"
+                  disabled={!input.trim()}
+                  aria-label="Send message"
+                >
+                  <Send className="w-4 h-4" />
+                </Button>
+              )}
+            </div>
           </form>
         </div>
       </div>

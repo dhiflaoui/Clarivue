@@ -19,7 +19,8 @@ export async function POST(request: NextRequest) {
       return new Response("Unauthorized", { status: 401 });
     }
 
-    const { messages, fileKey, documentId } = await request.json();
+    const { messages, fileKey, documentId, type } = await request.json();
+    console.log("type doc", type);
     console.log("📄 Document ID:", documentId);
     console.log("🔑 File Key:", fileKey);
     console.log("💬 Messages:", messages);
@@ -37,7 +38,8 @@ export async function POST(request: NextRequest) {
     const lastMessage = messages[messages.length - 1];
     const query = lastMessage.content;
     console.log("🔍 Query:", query);
-    await saveMessage(documentId, "user", query, user.id);
+    if (type === "default")
+      await saveMessage(documentId, "user", query, user.id);
 
     if (!query) {
       console.error("❌ No query content found");
@@ -130,7 +132,7 @@ export async function POST(request: NextRequest) {
           }
         }
         console.log("✅ Stream finished.");
-        if (fullResponse) {
+        if (fullResponse && type === "default") {
           await saveMessage(documentId, "assistant", fullResponse, user.id);
         }
         handlers.handleLLMEnd({}, "");

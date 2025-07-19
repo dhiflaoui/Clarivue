@@ -1,5 +1,4 @@
 "use client";
-
 import { BookOpenCheck, FileText } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";

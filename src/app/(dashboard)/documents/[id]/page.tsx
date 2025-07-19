@@ -2,6 +2,7 @@ import Chat from "@/components/chat/Chat";
 import PdfViewer from "@/components/chat/PdfViewer";
 import { getDocumentById } from "@/actions/db";
 import { redirect } from "next/navigation";
+i;
 
 interface Props {
   params: Promise<{
@@ -20,7 +21,7 @@ const ChatPage = async ({ params }: Props) => {
   return (
     <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
       <PdfViewer fileUrl={document.fileUrl!} />
-      <Chat document={document} />
+      <Chat document={document} type={"default"} />
     </div>
   );
 };

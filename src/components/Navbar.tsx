@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowRight, BookOpenCheck } from "lucide-react";
+import { ArrowRight, BookOpenCheck, Send } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
 
 const Navbar: React.FC = () => {
@@ -21,12 +21,23 @@ const Navbar: React.FC = () => {
               </span>
             </div>
           </div>
-          <Link href={isSignedIn ? "/documents" : "/sign-in"}>
-            {/* <Link href="/documents"> */}
-            <Button variant="link">
-              Get Started <ArrowRight className=" h-4 w-4" />
-            </Button>
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link href="/demo">
+              <Button
+                variant="outline"
+                size="sm"
+                className="relative px-4 py-2 h-9 font-medium transition-all duration-200 border-2 border-orange-500 bg-transparent text-orange-500 hover:bg-orange-500 hover:text-white hover:shadow-xl hover:scale-105"
+              >
+                <Send className="w-4 h-4 mr-2" />
+                Try a demo
+              </Button>
+            </Link>
+            <Link href={isSignedIn ? "/documents" : "/sign-in"}>
+              <Button variant="link">
+                Get Started <ArrowRight className=" h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
     </header>

@@ -15,7 +15,11 @@
     "utils": "@/lib/utils",
     "ui": "@/components/ui",
     "lib": "@/lib",
-    "hooks": "@/hooks"
+    "hooks": "@/hooks",
+    "popover": {
+      "dependencies": ["@radix-ui/react-popover"],
+      "files": ["ui/popover.tsx"]
+    }
   },
   "iconLibrary": "lucide"
 }
