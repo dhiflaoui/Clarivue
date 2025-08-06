@@ -17,7 +17,7 @@ const Navbar: React.FC = () => {
               <div className="p-2 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl mr-3 shadow-lg group-hover:shadow-xl transition-all duration-200">
                 <BookOpenCheck className="text-white w-5 h-5" />
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
+              <span className="hidden sm:block  text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
                 Clarivue
               </span>
             </div>
@@ -31,12 +31,16 @@ const Navbar: React.FC = () => {
                 className="relative px-4 py-2 h-9 font-medium transition-all duration-200 border-2 border-orange-500 bg-transparent text-orange-500 hover:bg-orange-500 hover:text-white hover:shadow-xl hover:scale-105"
               >
                 <Send className="w-4 h-4 mr-2" />
-                Try a demo
+
+                <span className="md:hidden">Try</span>
+                <span className="hidden md:inline">Try a demo</span>
               </Button>
             </Link>
             <Link href={isSignedIn ? "/documents" : "/sign-in"}>
               <Button variant="link">
-                Get Started <ArrowRight className=" h-4 w-4" />
+                <span className="hidden sm:inline">Get Started</span>
+                <span className="sm:hidden">Start</span>
+                <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
           </div>
