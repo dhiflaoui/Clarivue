@@ -100,14 +100,7 @@ const Chat = ({ document, type }: Props) => {
     );
   };
   return (
-    <div
-      className="w-1/2 mt-15 overflow-scroll bg-white dark:bg-gray-800"
-      style={{
-        height: "calc(100vh - 3.75rem)",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
+    <div className="flex-1 w-full h-full flex flex-col bg-white dark:bg-gray-800 mt-16">
       <div className="h-full flex flex-col justify-between">
         {/* Messages */}
         <div className="overflow-auto bg-white dark:bg-gray-800">

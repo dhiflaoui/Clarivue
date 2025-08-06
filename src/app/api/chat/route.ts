@@ -4,20 +4,20 @@ import { PineconeStore } from "langchain/vectorstores/pinecone";
 import embeddings from "@/lib/HuggingFace";
 import { StreamingTextResponse, LangChainStream, Message } from "ai"; // Import Message type
 import { InferenceClient } from "@huggingface/inference";
-import { currentUser } from "@clerk/nextjs/server";
+// import { currentUser } from "@clerk/nextjs/server";
 import prismadb from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
   try {
     console.log("🚀 API Route started");
 
-    const user = await currentUser();
-    console.log("👤 User:", user?.id);
+    // const user = await currentUser();
+    // console.log("👤 User:", user?.id);
 
-    if (!user) {
-      console.error("❌ Unauthorized - no user found");
-      return new Response("Unauthorized", { status: 401 });
-    }
+    // if (!user) {
+    //   console.error("❌ Unauthorized - no user found");
+    //   return new Response("Unauthorized", { status: 401 });
+    // }
 
     const { messages, fileKey, documentId, type } = await request.json();
     console.log("type doc", type);

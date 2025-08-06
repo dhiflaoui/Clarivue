@@ -85,14 +85,7 @@ const PdfViewer = ({ fileUrl }: PdfViewerProps) => {
     renderToolbar,
   });
   return (
-    <div
-      className="w-1/2 mt-15"
-      style={{
-        height: "calc(100vh - 3.75rem)",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
+    <div className="flex-1 w-full h-full">
       <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js">
         <Viewer
           plugins={[defaultLayoutPluginInstance]}

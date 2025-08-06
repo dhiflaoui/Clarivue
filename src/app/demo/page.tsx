@@ -15,9 +15,13 @@ const DemoPage = () => {
   };
 
   return (
-    <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
-      <PdfViewer fileUrl={process.env.CUSTOMFILEURL!} />
-      <Chat document={defaultDocument} type={"custom"} />
+    <div className="flex flex-col md:flex-row h-screen overflow-hidden">
+      <div className="w-full md:w-1/2 h-1/2 md:h-full">
+        <PdfViewer fileUrl={process.env.CUSTOMFILEURL!} />
+      </div>
+      <div className="w-full md:w-1/2 h-1/2 md:h-full">
+        <Chat document={defaultDocument} type={"custom"} />
+      </div>
     </div>
   );
 };

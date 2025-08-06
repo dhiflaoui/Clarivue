@@ -15,7 +15,7 @@ const DashboardNavbar: React.FC = () => {
           <div className="p-1.5 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg">
             <BookOpenCheck className="text-white w-4 h-4" />
           </div>
-          <span className="font-bold text-lg bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent dark:from-slate-200 dark:to-slate-400">
+          <span className="hidden sm:block font-bold text-lg bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent dark:from-slate-200 dark:to-slate-400">
             Clarivue
           </span>
         </Link>

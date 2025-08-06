@@ -15,7 +15,7 @@ const demoBar: React.FC = () => {
               <div className="p-2 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl mr-3 shadow-lg group-hover:shadow-xl transition-all duration-200">
                 <BookOpenCheck className="text-white w-5 h-5" />
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent dark:from-slate-200 dark:to-slate-400">
+              <span className="hidden sm:block text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent dark:from-slate-200 dark:to-slate-400">
                 Clarivue
               </span>
             </div>
@@ -38,9 +38,9 @@ const demoBar: React.FC = () => {
                 </Button>
               </Link>
 
-              <div className="h-6 w-px bg-slate-200 mx-2 dark:bg-slate-700" />
+              <div className="hidden sm:block h-6 w-px bg-slate-200 mx-2 dark:bg-slate-700" />
 
-              <Link href={"/"}>
+              <Link href={"/"} className="hidden sm:block">
                 <Button
                   variant="link"
                   className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
