@@ -12,18 +12,19 @@ export async function POST(request: NextRequest) {
     console.log("🚀 API Route started");
 
     const user = await currentUser();
-    console.log("👤 User:", user?.id);
+    // console.log("👤 User:", user?.id);
 
-    if (!user) {
-      console.error("❌ Unauthorized - no user found");
-      return new Response("Unauthorized", { status: 401 });
-    }
+    // if (!user) {
+    //   console.error("❌ Unauthorized - no user found");
+    //   return new Response("Unauthorized", { status: 401 });
+    // }
 
     const { messages, fileKey, documentId, type } = await request.json();
-    console.log("type doc", type);
-    console.log("📄 Document ID:", documentId);
-    console.log("🔑 File Key:", fileKey);
-    console.log("💬 Messages:", messages);
+    // console.log("type doc", type);
+    // console.log("📄 Document ID:", documentId);
+    // console.log("🔑 File Key:", fileKey);
+    // console.log("💬 Messages:", messages);
+    const isDemoPdf = fileKey.includes("gpt-4.pdf");
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       console.error("❌ No messages provided");
@@ -38,9 +39,9 @@ export async function POST(request: NextRequest) {
     const lastMessage = messages[messages.length - 1];
     const query = lastMessage.content;
     console.log("🔍 Query:", query);
-    if (type === "default")
-      await saveMessage(documentId, "user", query, user.id);
-
+    if (type === "default" && !isDemoPdf) {
+      await saveMessage(documentId, "user", query, user!.id);
+    }
     if (!query) {
       console.error("❌ No query content found");
       return new Response("Query content is required", { status: 400 });
@@ -135,8 +136,8 @@ export async function POST(request: NextRequest) {
           }
         }
         console.log("✅ Stream finished.");
-        if (fullResponse && type === "default") {
-          await saveMessage(documentId, "assistant", fullResponse, user.id);
+        if (fullResponse && type === "default" && !isDemoPdf) {
+          await saveMessage(documentId, "assistant", fullResponse, user!.id);
         }
         handlers.handleLLMEnd({}, "");
       } catch (streamError) {
